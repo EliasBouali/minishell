@@ -30,6 +30,8 @@ SRCS := \
   $(BUILTINSDIR)/ft_echo.c \
 	$(BUILTINSDIR)/ft_pwd.c \
 	$(BUILTINSDIR)/ft_env.c \
+	$(BUILTINSDIR)/ft_cd.c \
+	$(BUILTINSDIR)/ft_export.c \
 
 
 OBJS := $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)

@@ -11,6 +11,8 @@ static const t_builtin make_builtin[] = {
   {"echo", ft_echo},
   {"pwd", ft_pwd},
   {"env", ft_env},
+  {"cd", ft_cd},
+  {"export", ft_export},
   {NULL, NULL}
 };
 

@@ -26,6 +26,8 @@ size_t ft_strlen(const char *s);
 void free_split(char **split);
 char    *ft_strchr(const char *s, int c);
 void    ft_putstr_fd(char *s, int fd);
+char    *ft_strdup(const char *s);
+
 
 // fonction dans le dossier utils, fichier second_utils.c:
 void    ft_putendl_fd(char *s, int fd);
@@ -51,9 +53,10 @@ void prompt_loop(char **env);
 int ft_echo(char **argv);
 int ft_pwd(char **argv);
 int ft_env(char **argv);
+int ft_cd(char **argv);
 int cmd_is_builtin(const char *cmd);
 int exec_builtin(char **argv);
-
+int ft_export(char **argv);
 
 
 

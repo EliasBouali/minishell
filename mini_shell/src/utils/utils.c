@@ -63,3 +63,25 @@ void    ft_putstr_fd(char *s, int fd)
         i++;
     }
 }
+
+char    *ft_strdup(const char *s)
+{
+    size_t  i;
+    int     len;
+    char    *copy;
+
+    if (!s)
+        return (0);
+    i = 0;
+    len = ft_strlen(s);
+    copy = (char *)malloc(sizeof(char) * (len + 1));
+    if (!copy)
+        return (NULL);
+    while (s[i])
+    {
+        copy[i] = s[i];
+        i++;
+    }
+    copy[i] = '\0';
+    return (copy);
+}

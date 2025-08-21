@@ -13,6 +13,7 @@ static const t_builtin make_builtin[] = {
   {"env", ft_env},
   {"cd", ft_cd},
   {"export", ft_export},
+  {"exit", ft_exit},
   {NULL, NULL}
 };
 

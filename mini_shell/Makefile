@@ -32,7 +32,7 @@ SRCS := \
 	$(BUILTINSDIR)/ft_env.c \
 	$(BUILTINSDIR)/ft_cd.c \
 	$(BUILTINSDIR)/ft_export.c \
-
+	$(BUILTINSDIR)/ft_exit.c \
 
 OBJS := $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 

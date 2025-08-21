@@ -58,6 +58,7 @@ int ft_cd(char **argv);
 int cmd_is_builtin(const char *cmd);
 int exec_builtin(char **argv);
 int ft_export(char **argv);
+int ft_exit(char **argv);
 
 
 

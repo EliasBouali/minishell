@@ -26,17 +26,17 @@ int parse_is_valid(char *s, int val_out)
     while (s[i] >= '0' && s[i] <= '9')
     {
       digit = s[i] - '0';
-          if (sign == 1)
-    {
-      if (val > (LLONG_MAX - digit) / 10)
-        return 0;
-    }
-    else
-    {
-      if (val > (-(LLONG_MIN) - digit) / 10)
-        return 0;
-    }
-    val = val * 10 + digit;
+      if (sign == 1)
+        {
+          if (val > (LLONG_MAX - digit) / 10)
+            return 0;
+        }
+      else
+      {
+        if (val > (-(LLONG_MIN) - digit) / 10)
+          return 0;
+      }
+      val = val * 10 + digit;
       i++;
     }
 }

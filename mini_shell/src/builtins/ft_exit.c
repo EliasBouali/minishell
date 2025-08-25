@@ -50,10 +50,11 @@ int parse_is_valid(const char *s, long long *val_out)
   return (1);
 }
 
-int ft_exit(char **argv)
+int ft_exit(char **argv, t_env **env)
 {
   long long value;
 
+  (void)env;
   if (!argv || !argv[1])
   {
     ft_putendl_fd("exit", 1);

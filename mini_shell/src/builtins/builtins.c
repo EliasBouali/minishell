@@ -1,6 +1,6 @@
 #include "../../include/minishell.h"
 
-typedef int (*t_builtin_fn) (char **argv);
+typedef int (*t_builtin_fn) (char **argv, t_env **env);
 
 typedef struct s_builtin {
     const char *name;
@@ -14,9 +14,11 @@ static const t_builtin make_builtin[] = {
   {"cd", ft_cd},
   {"export", ft_export},
   {"exit", ft_exit},
+  {"unset", ft_unset},
   {NULL, NULL}
 };
 
+// verifie si cmd correspond exactement a un builtin de make builtin
 int cmd_is_builtin(const char *cmd)
 {
   int i;
@@ -33,7 +35,7 @@ int cmd_is_builtin(const char *cmd)
     return (0);
 }
 
-int exec_builtin(char **argv)
+int exec_builtin(char **argv, t_env **env)
 {
   int i;
 
@@ -44,9 +46,9 @@ int exec_builtin(char **argv)
   {
     if (ft_strncmp(argv[0], make_builtin[i].name, ft_strlen(make_builtin[i].name) + 1) == 0)
     {
-      return (make_builtin[i].function(argv));
+      return (make_builtin[i].function(argv, env));
     }
     i++;
   }
-  return (0);
+  return (-1); // un retour different de zero c est le comportement attentu quand une erreure arrive et que ce n est pas un builtin
 }

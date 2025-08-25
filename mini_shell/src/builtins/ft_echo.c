@@ -1,6 +1,6 @@
 #include "../include/minishell.h"
 
-int ft_echo(char **argv)
+int ft_echo(char **argv, t_env **env)
 {
   int i;
   int new_line;
@@ -8,6 +8,7 @@ int ft_echo(char **argv)
 
   i = 1;
   new_line = 1;
+  (void)env;
   while (argv[i] && argv[i][0] == '-' && argv[i][1] == 'n')
   {
     j = 2;

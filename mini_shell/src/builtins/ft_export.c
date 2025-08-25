@@ -1,80 +1,87 @@
 #include "../../include/minishell.h"
 
-int is_valid_name(char *s)
-{
-    int i;
 
-    if (!s || s[0] == '\0')
-        return 0;
-    if (!((s[0] >= 'A' && s[0] <= 'Z') ||
-          (s[0] >= 'a' && s[0] <= 'z') ||
-          s[0] == '_'))
-        return 0;
-    i = 1;
-    while (s[i])
+static int print_env_from_tenv(t_env *env)
+{
+    t_env *cur;
+
+    cur = env;
+    while (cur)
     {
-        if (!((s[i] >= 'A' && s[i] <= 'Z') ||
-              (s[i] >= 'a' && s[i] <= 'z') ||
-              (s[i] >= '0' && s[i] <= '9') ||
-              s[i] == '_'))
-            return 0;
-        i++;
+        if (cur->value != NULL)
+        {
+            ft_putstr_fd(cur->name, 1);
+            ft_putstr_fd("=", 1);
+            ft_putstr_fd(cur->value, 1);
+            ft_putstr_fd("\n", 1);
+        }
+        cur = cur->next;
     }
-    return 1;
+    return (0);
 }
 
-int split_name_value(const char *arg, char **name_out, char **value_out)
+
+static int split_name_value(const char *arg, char **name_out, char **value_out)
 {
-	size_t i;
-	size_t j;
-	char   *name;
-	char   *value;
+    size_t  i;
+    size_t  j;
+    char    *name;
+    char    *value;
 
-	if (!arg || !name_out || !value_out)
-		return (0);
-	i = 0;
-	while (arg[i] && arg[i] != '=')
-		i++;
-
-	if (arg[i] == '=')
-	{
-		name = (char *)malloc(i + 1);
-		if (!name)
-			return (0);
-		j = 0;
-		while (j < i)
-		{
-			name[j] = arg[j];
-			j++;
-		}
-		name[i] = '\0';
-		value = ft_strdup(arg + i + 1);
-		if (!value)
-		{
-			free(name);
-			return (0);
-		}
-		*name_out = name;
-		*value_out = value;
-		return (1);
-	}
-	name = ft_strdup(arg);
-	if (!name)
-		return (0);
-	*name_out = name;
-	*value_out = NULL;
-	return (1);
+    if (!arg || !name_out || !value_out)
+        return (0);
+    i = 0;
+    while (arg[i] && arg[i] != '=')
+        i++;
+    if (arg[i] == '=')
+    {
+        name = (char *)malloc(i + 1);
+        if (!name)
+            return (0);
+        j = 0;
+        while (j < i)
+        {
+            name[j] = arg[j];
+            j++;
+        }
+        name[i] = '\0';
+        value = ft_strdup(arg + i + 1);
+        if (!value)
+        {
+            free(name);
+            return (0);
+        }
+        *name_out = name;
+        *value_out = value;
+        return (1);
+    }
+    name = ft_strdup(arg);
+    if (!name)
+        return (0);
+    *name_out = name;
+    *value_out = NULL;
+    return (1);
 }
 
-int ft_export(char **argv)
+static void print_export_invalid(const char *arg)
+{
+    ft_putstr_fd("minishell: export: `", 2);
+    ft_putstr_fd((char *)arg, 2);
+    ft_putstr_fd("': not a valid identifier\n", 2);
+}
+
+int ft_export(char **argv, t_env **env)
 {
     int   i;
     int   exit_code;
     char *name;
     char *value;
+    int   rc;
 
+    if (!env)
+        return (1);
     if (!argv || !argv[1])
-        return ft_env(argv);
+        return print_env_from_tenv(*env);
     exit_code = 0;
     i = 1;
     while (argv[i])
@@ -86,21 +93,25 @@ int ft_export(char **argv)
             i++;
             continue;
         }
-        if (!is_valid_name(name))
+        if (!is_valid_name((const char *)name))
         {
-            ft_putstr_fd("minishell: export: `", 2);
-            ft_putstr_fd(argv[i], 2);
-            ft_putstr_fd("': not a valid identifier\n", 2);
+            print_export_invalid(argv[i]);
             exit_code = 1;
-
         }
         else
         {
-
+            rc = env_set(env, (const char *)name, (const char *)value);
+            if (rc == 2)
+            {
+                ft_putstr_fd("minishell: export: allocation error\n", 2);
+                exit_code = 1;
+            }
         }
-        if (name)  free(name);
-        if (value) free(value);
+        if (name)
+            free(name);
+        if (value)
+            free(value);
         i++;
     }
-    return exit_code;
+    return (exit_code);
 }

@@ -1,23 +1,24 @@
 #include "../../include/minishell.h"
 
-extern char **environ;
 
-int	ft_env(char **argv)
+int ft_env(char **argv, t_env **env)
 {
-	int	i;
+    t_env *cur;
 
-	(void)argv;
-	if (!environ)
-		return (0);
-	i = 0;
-	while (environ[i])
-	{
-		if (ft_strchr(environ[i], '='))
-		{
-			ft_putstr_fd(environ[i], 1);
-			ft_putstr_fd("\n", 1);
-		}
-		i++;
-	}
-	return (0);
+    (void)argv;
+    if (!env || !*env)
+        return (0);
+    cur = *env;
+    while (cur)
+    {
+        if (cur->value != NULL)
+        {
+            ft_putstr_fd(cur->name, 1);
+            ft_putstr_fd("=", 1);
+            ft_putstr_fd(cur->value, 1);
+            ft_putstr_fd("\n", 1);
+        }
+        cur = cur->next;
+    }
+    return (0);
 }

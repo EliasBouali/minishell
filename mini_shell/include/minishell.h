@@ -11,15 +11,9 @@
 #include <readline/history.h>
 #include <signal.h>
 #include <limits.h>
+#include <string.h>
+#include <fcntl.h>
 
-
-
-typedef struct s_command
-{
-  char **args;
-}       t_command;
-
-extern int g_exit_code;
 
 typedef struct s_env
 {
@@ -27,6 +21,31 @@ typedef struct s_env
   char *name;
   struct s_env *next;
 } t_env;
+
+typedef enum e_redir_type
+{
+  REDIR_INPUT,             // <
+  REDIR_OUTPUT,           // >
+  REDIR_APPEND,          // >>
+  REDIR_HEREDOC         // <<
+} t_redir_type;
+
+typedef struct s_redir
+{
+  t_redir_type type;
+  char *target;
+  int fd;
+  struct s_redir *next;
+}   t_redir;
+
+typedef struct s_command
+{
+  char **args;
+  t_redir *redir;
+}       t_command;
+
+extern int g_exit_code;
+
 
 // fonction dans le dossier utils, fichier utils.c
 int	ft_strncmp(const char *s1, const char *s2, size_t n);
@@ -50,6 +69,10 @@ char	**ft_split(char const *s, char c);
 // fonction dans le dossier executor fichier exec.c :
 char *get_path_to_cmd(char *cmd, const char *path_var);
 void handle_command(t_command *cmd, t_env *env);
+// fonction dans le dossier executor fichier haredoc.c :
+int open_heredoc(const char *delimiteur, int *out_fd, t_env **env);
+// fonction dans le dossier executor fichier redirection.c:
+int apply_redirections(t_command *cmd, t_env **env);
 
 // fonction dans ledossier signals fichier signals.c:
 void prompt_signal_handler(int sign);

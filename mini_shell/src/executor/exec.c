@@ -68,6 +68,41 @@ void handle_command(t_command *cmd, t_env *env)
     if (!cmd || !cmd->args || !cmd->args[0])
         return;
     cmd_name = cmd->args[0];
+    if (cmd_is_builtin(cmd_name))
+    {
+        int save_in;
+        int save_out;
+        int rc;
+
+        save_in = dup(STDIN_FILENO);
+        save_out = dup(STDOUT_FILENO);
+        if (save_in == -1 || save_out == -1)
+        {
+            perror("minishell: dup");
+            if (save_in != -1) close(save_in);
+            if (save_out != -1) close(save_out);
+            g_exit_code = 1;
+            return;
+        }
+        /* Appliquer toutes les redirections (gère aussi << via open_heredoc) */
+        if (apply_redirections(cmd, &env) == -1)
+        {
+            /* Échec d’ouverture/dup2 : restaurer et sortir (g_exit_code déjà fixé) */
+            if (dup2(save_in, STDIN_FILENO) == -1) perror("minishell: dup2");
+            if (dup2(save_out, STDOUT_FILENO) == -1) perror("minishell: dup2");
+            close(save_in);
+            close(save_out);
+            return;
+        }
+        rc = exec_builtin(cmd->args, &env); /* doit retourner et/ou mettre g_exit_code */
+        /* Restaurer FDs du shell */
+        if (dup2(save_in, STDIN_FILENO) == -1) perror("minishell: dup2");
+        if (dup2(save_out, STDOUT_FILENO) == -1) perror("minishell: dup2");
+        close(save_in);
+        close(save_out);
+        g_exit_code = rc;
+        return;
+    }
     if (ft_strchr(cmd_name, '/'))
     {
         struct stat st;
@@ -134,6 +169,8 @@ void handle_command(t_command *cmd, t_env *env)
     {
         signal(SIGINT, SIG_DFL);
         signal(SIGQUIT, SIG_DFL);
+        if (apply_redirections(cmd, &env) == -1)
+          _exit(g_exit_code ? g_exit_code : 1);
         execve(path, cmd->args, envp_child);
         perror("minishell");
         free_envp_array(envp_child);

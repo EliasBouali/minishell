@@ -22,6 +22,8 @@ SRCS := \
   $(EXECDIR)/main.c \
   $(MAINDIR)/prompt.c \
   $(EXECDIR)/exec.c \
+	$(EXECDIR)/heredoc.c \
+	$(EXECDIR)/redirection.c \
   $(SIGNALSDIR)/signals.c \
   $(UTILSDIR)/utils.c \
   $(UTILSDIR)/second_utils.c \

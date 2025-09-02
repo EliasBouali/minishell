@@ -24,10 +24,13 @@ SRCS := \
   $(EXECDIR)/exec.c \
 	$(EXECDIR)/heredoc.c \
 	$(EXECDIR)/redirection.c \
+	$(EXECDIR)/pipes.c \
   $(SIGNALSDIR)/signals.c \
   $(UTILSDIR)/utils.c \
   $(UTILSDIR)/second_utils.c \
   $(UTILSDIR)/three_utils.c \
+	$(UTILSDIR)/pipes_utils.c \
+	$(UTILSDIR)/pipes_seconde_utils.c \
   $(UTILSDIR)/ft_split.c \
   $(UTILSDIR)/ft_strjoin.c \
   $(BUILTINSDIR)/builtins.c \

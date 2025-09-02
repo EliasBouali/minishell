@@ -1,29 +1,66 @@
 #include "../include/minishell.h"
 
 // parsing fait par chat le tant que Stephane finisse son parsing
+#include "../include/minishell.h"
+#include <string.h> // memset
+
+
+
+/* ========== Helpers internes ========== */
 
 static char *ft_itoa(int n)
 {
-    char buf[12];
-    int len = 0;
-    int tmp = n;
+    char  buf[12];
+    int   len;
+    int   tmp;
     char *res;
+    int   i;
 
     if (n == 0)
         return ft_strdup("0");
-
-    while (tmp > 0) {
+    if (n < 0) // sécurité, mais $? sera toujours >=0
+        n = -n;
+    len = 0;
+    tmp = n;
+    while (tmp > 0)
+    {
         buf[len++] = '0' + (tmp % 10);
         tmp /= 10;
     }
     res = (char *)malloc(len + 1);
     if (!res)
         return NULL;
-    for (int i = 0; i < len; i++)
+    i = 0;
+    while (i < len)
+    {
         res[i] = buf[len - 1 - i];
+        i++;
+    }
     res[len] = '\0';
     return res;
 }
+
+static void free_redir(t_redir **head)
+{
+    t_redir *redirection;
+    t_redir *tmp;
+
+    if (!head)
+        return;
+    redirection = *head;
+    while (redirection)
+    {
+        tmp = redirection->next;
+        if (redirection->target)
+            free(redirection->target);
+        free(redirection);
+        redirection = tmp;
+    }
+    *head = NULL;
+}
+
+/* ========== Parsing naïf (temporaire) ========== */
+
 static void parse_line_naive(const char *line, t_command *cmd)
 {
     char    **tokens = NULL;
@@ -40,25 +77,29 @@ static void parse_line_naive(const char *line, t_command *cmd)
         return;
 
     /* 1) Compter les tokens non-redirections */
-    for (i = 0; tokens[i]; )
+    i = 0;
+    while (tokens[i])
     {
         if (!ft_strncmp(tokens[i], ">>", 3) || !ft_strncmp(tokens[i], "<<", 3) ||
             !ft_strncmp(tokens[i], ">", 2)  || !ft_strncmp(tokens[i], "<", 2))
         {
-            if (!tokens[i + 1]) {
+            if (!tokens[i + 1])
+            {
                 ft_putendl_fd("minishell: syntax error near unexpected token", 2);
                 break;
             }
-            i += 2; /* sauter opérateur + cible */
+            i += 2;
             continue;
         }
         argc_tmp++;
         i++;
     }
 
-    if (argc_tmp > 0) {
+    if (argc_tmp > 0)
+    {
         argv_tmp = (char **)malloc(sizeof(char*) * (argc_tmp + 1));
-        if (!argv_tmp) {
+        if (!argv_tmp)
+        {
             ft_putendl_fd("minishell: alloc error", 2);
             free_split(tokens);
             return;
@@ -67,55 +108,70 @@ static void parse_line_naive(const char *line, t_command *cmd)
 
     /* 2) Construire argv_tmp et la liste des redirections */
     j = 0;
-    for (i = 0; tokens[i]; )
+    i = 0;
+    while (tokens[i])
     {
         t_redir *r = NULL;
 
-        if (!ft_strncmp(tokens[i], ">>", 3) && tokens[i + 1]) {
+        if (!ft_strncmp(tokens[i], ">>", 3) && tokens[i + 1])
+        {
             r = (t_redir*)malloc(sizeof(*r));
             if (!r) { ft_putendl_fd("minishell: alloc error", 2); goto fail; }
             r->type = REDIR_APPEND;
             r->target = ft_strdup(tokens[i + 1]);
             r->fd = -1; r->next = NULL;
         }
-        else if (!ft_strncmp(tokens[i], "<<", 3) && tokens[i + 1]) {
+        else if (!ft_strncmp(tokens[i], "<<", 3) && tokens[i + 1])
+        {
             r = (t_redir*)malloc(sizeof(*r));
             if (!r) { ft_putendl_fd("minishell: alloc error", 2); goto fail; }
             r->type = REDIR_HEREDOC;
             r->target = ft_strdup(tokens[i + 1]);
             r->fd = -1; r->next = NULL;
         }
-        else if (!ft_strncmp(tokens[i], ">", 2) && tokens[i + 1]) {
+        else if (!ft_strncmp(tokens[i], ">", 2) && tokens[i + 1])
+        {
             r = (t_redir*)malloc(sizeof(*r));
             if (!r) { ft_putendl_fd("minishell: alloc error", 2); goto fail; }
             r->type = REDIR_OUTPUT;
             r->target = ft_strdup(tokens[i + 1]);
             r->fd = -1; r->next = NULL;
         }
-        else if (!ft_strncmp(tokens[i], "<", 2) && tokens[i + 1]) {
+        else if (!ft_strncmp(tokens[i], "<", 2) && tokens[i + 1])
+        {
             r = (t_redir*)malloc(sizeof(*r));
             if (!r) { ft_putendl_fd("minishell: alloc error", 2); goto fail; }
             r->type = REDIR_INPUT;
             r->target = ft_strdup(tokens[i + 1]);
             r->fd = -1; r->next = NULL;
         }
-        else {
+        else
+        {
             /* token normal → copie; expansion minimale de "$?" */
-            if (argv_tmp) {
-                if (!ft_strncmp(tokens[i], "$?", 3)) {
+            if (argv_tmp)
+            {
+                if (!ft_strncmp(tokens[i], "$?", 3))
+                {
                     char *num = ft_itoa(g_exit_code);
                     argv_tmp[j++] = num ? num : ft_strdup("$?");
-                } else {
-                    argv_tmp[j++] = ft_strdup(tokens[i]);
                 }
+                else
+                    argv_tmp[j++] = ft_strdup(tokens[i]);
             }
             i++;
             continue;
         }
 
-        if (!r || !r->target) { ft_putendl_fd("minishell: alloc error", 2); if (r) free(r); goto fail; }
-        if (!r_head) r_head = r; else r_tail->next = r; r_tail = r;
-        i += 2; /* saute opérateur + cible */
+        if (!r || !r->target)
+        {
+            ft_putendl_fd("minishell: alloc error", 2);
+            if (r) free(r);
+            goto fail;
+        }
+        if (!r_head) r_head = r;
+        else r_tail->next = r;
+        r_tail = r;
+        i += 2;
     }
 
     if (argv_tmp)
@@ -127,8 +183,8 @@ static void parse_line_naive(const char *line, t_command *cmd)
     return;
 
 fail:
-    /* Nettoyage en cas d'erreur d'alloc pendant la 2e passe */
-    if (argv_tmp) {
+    if (argv_tmp)
+    {
         while (j-- > 0) free(argv_tmp[j]);
         free(argv_tmp);
     }
@@ -141,38 +197,92 @@ fail:
     cmd->redir = NULL;
 }
 
+/* ========== Gestion liste commandes (naïf) ========== */
 
-static void free_redir(t_redir **head)
+int build_cmd_list_naive(const char *line, t_command **out_head)
 {
-  t_redir *redirection;
-  t_redir *tmp;
+    char       **parts;
+    int          i;
+    t_command   *head, *tail, *node;
 
-  if (!head)
-    return ;
-  redirection = *head;
-  while (redirection)
-  {
-    tmp = redirection->next;
-    if (redirection->target)
-      free(redirection->target);
-    free(redirection);
-    redirection = tmp;
-  }
-  *head = NULL;
+    *out_head = NULL;
+    parts = ft_split(line, '|'); // naïf: pas de quotes/escapes
+    if (!parts)
+        return -1;
+
+    head = NULL;
+    tail = NULL;
+    i = 0;
+    while (parts[i])
+    {
+        node = (t_command *)malloc(sizeof(t_command));
+        if (!node)
+        {
+            free_split(parts);
+            free_cmd_list(head);
+            return -1;
+        }
+        memset(node, 0, sizeof(*node));
+        parse_line_naive(parts[i], node);
+        node->next = NULL;
+        if (!head)
+            head = node;
+        else
+            tail->next = node;
+        tail = node;
+        i++;
+    }
+    free_split(parts);
+    *out_head = head;
+    return 0;
 }
+
+void free_cmd_list(t_command *head)
+{
+    t_command *next;
+
+    while (head)
+    {
+        next = head->next;
+        if (head->args)
+            free_split(head->args);
+        if (head->redir)
+            free_redir(&head->redir);
+        free(head);
+        head = next;
+    }
+}
+
+int execute_command_list(t_command *head, t_env *env)
+{
+    int n;
+
+    if (!head)
+        return g_exit_code;
+    n = count_cmd(head);          // <- prototype dans minishell.h
+    if (n <= 1)
+    {
+        handle_command(head, env); // ta fonction existante
+        return g_exit_code;
+    }
+    return execute_pipeline(head, env); // défini dans pipes.c
+}
+
+
 void prompt_loop(char **envp)
 {
-    char *line;
-    t_command cmd;
-    t_env *env;
+    char     *line;
+    t_command *head;
+    t_env    *env;
 
     env = init_env(envp);
     if (!env)
     {
-      ft_putstr_fd("minishell: failed to init environment\n", 2);
-      return ;
+        ft_putstr_fd("minishell: failed to init environment\n", 2);
+        return;
     }
     setup_prompt_signals();
+
     while (1)
     {
         line = readline("minishell$ ");
@@ -188,10 +298,13 @@ void prompt_loop(char **envp)
             continue;
         }
         add_history(line);
-        parse_line_naive(line, &cmd);
-        handle_command(&cmd, env);
-        free_split(cmd.args);
-        free_redir(&cmd.redir);
+
+        head = NULL;
+        if (build_cmd_list_naive(line, &head) == 0)
+        {
+            execute_command_list(head, env);
+            free_cmd_list(head);
+        }
         free(line);
     }
     free_env(&env);

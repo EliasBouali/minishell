@@ -42,6 +42,7 @@ typedef struct s_command
 {
   char **args;
   t_redir *redir;
+  struct s_command *next;
 }       t_command;
 
 extern int g_exit_code;
@@ -112,6 +113,32 @@ void free_envp_array(char **arr);
       void free_env(t_env **env);
       // get_env.c:
       const char *env_get(t_env *env, const char *name);
+
+// fonction dans le dossier utils sous_dossier pipes_utils.c:
+void restore_signals_for_child(void);
+int count_cmd(t_command *head);
+int **alloc_pipes(int number_of_cmd);
+void free_pipes(int **pipes, int number_of_cmd);
+void close_all_pipes(int **pipes, int number_of_cmd);
+
+// fonction dans le dossier utils sous dossier pipes_seconde_utils.c:
+int create_pipes(int **pipes, int number_of_cmd);
+void connect_pipes_for_child(int cmd_index, int number_of_cmd, int **pipes);
+t_command *get_cmd_position(t_command *head, int idx_cmd_pipeline);
+void print_cmd_not_found(const char *name);
+int path_checks_for_slash_cmd(const char *cmd_name);
+
+
+// fonction dans le dossier executor fichier pipes.c:
+int execute_pipeline(t_command *head, t_env *env);
+
+// parsing de chat gpt:
+int  build_cmd_list_naive(const char *line, t_command **out_head);
+void free_cmd_list(t_command *head);
+int  execute_command_list(t_command *head, t_env *env);
+
+
+
 
 
 

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   env_init.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:39:25 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:39:27 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 static char	*dup_n_in_string(const char *s, size_t n)
@@ -18,7 +30,8 @@ static char	*dup_n_in_string(const char *s, size_t n)
 	return (dst);
 }
 
-static int	parse_line(const char *line, char **out_name, const char **out_value)
+static int	parse_line(const char *line, char **out_name,
+		const char **out_value)
 {
 	const char	*equal_sign;
 
@@ -81,4 +94,3 @@ t_env	*init_env(char **envp_src)
 	}
 	return (env);
 }
-

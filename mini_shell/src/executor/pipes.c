@@ -1,13 +1,24 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipes.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:42:40 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:42:42 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 typedef struct s_pipeline_ctx
 {
-	int		**pipes;
-	int		n;
-	t_env	*env;
-	t_command *head;
-}	t_pipeline_ctx;
-
+	int			**pipes;
+	int			n;
+	t_env		*env;
+	t_command	*head;
+}				t_pipeline_ctx;
 
 static int	setup_child_io(int idx, t_command *cmd, t_pipeline_ctx *cx)
 {
@@ -23,7 +34,6 @@ static int	setup_child_io(int idx, t_command *cmd, t_pipeline_ctx *cx)
 	}
 	return (0);
 }
-
 
 static void	child_exec(int idx, t_command *cmd, t_pipeline_ctx *cx)
 {
@@ -66,7 +76,6 @@ static int	launch_children(t_pipeline_ctx *cx, pid_t *pids)
 	return (0);
 }
 
-
 int	execute_pipeline(t_command *head, t_env *env)
 {
 	int				n;
@@ -77,7 +86,7 @@ int	execute_pipeline(t_command *head, t_env *env)
 
 	n = count_cmd(head);
 	if (n < 2)
-    return (handle_command(head, env),g_exit_code);
+		return (handle_command(head, env), g_exit_code);
 	if (setup_pipes_and_pids(n, &pipes, &pids) < 0)
 		return (g_exit_code = 1);
 	cx.pipes = pipes;
@@ -88,7 +97,7 @@ int	execute_pipeline(t_command *head, t_env *env)
 	close_all_pipes(pipes, n);
 	free_pipes(pipes, n);
 	if (rc < 0)
-    return (g_exit_code);
+		return (g_exit_code);
 	rc = wait_pipeline(pids, n);
 	free(pids);
 	return (rc);

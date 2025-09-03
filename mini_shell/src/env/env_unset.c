@@ -1,9 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   env_unset.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:40:14 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:40:16 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 static int	remove_head(t_env **env)
 {
-	t_env *tmp = *env;
+	t_env	*tmp;
 
+	tmp = *env;
 	*env = (*env)->next;
 	free(tmp->name);
 	if (tmp->value)
@@ -14,8 +27,9 @@ static int	remove_head(t_env **env)
 
 static int	remove_next(t_env *prev)
 {
-	t_env *current = prev->next;
+	t_env	*current;
 
+	current = prev->next;
 	prev->next = current->next;
 	free(current->name);
 	if (current->value)
@@ -26,15 +40,15 @@ static int	remove_next(t_env *prev)
 
 int	env_unset(t_env **env, const char *name)
 {
-	t_env *preview;
-	t_env *current;
+	t_env	*preview;
+	t_env	*current;
 
 	if (!env || !is_valid_name(name))
 		return (1);
 	if (!*env)
 		return (0);
-	if (ft_strlen((*env)->name) == ft_strlen(name)
-		&& ft_strncmp((*env)->name, name, ft_strlen(name)) == 0)
+	if (ft_strlen((*env)->name) == ft_strlen(name) && ft_strncmp((*env)->name,
+			name, ft_strlen(name)) == 0)
 		return (remove_head(env));
 	preview = *env;
 	current = preview->next;

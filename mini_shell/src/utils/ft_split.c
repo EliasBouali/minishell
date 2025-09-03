@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:46:56 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:46:58 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-static	int	ft_count_words(char const *str, char c)
+static int	ft_count_words(char const *str, char c)
 {
 	int	count;
 	int	i;
@@ -19,7 +31,7 @@ static	int	ft_count_words(char const *str, char c)
 	return (count);
 }
 
-static	char	*ft_make_word(char const *str, char c, int i)
+static char	*ft_make_word(char const *str, char c, int i)
 {
 	int		len;
 	int		j;
@@ -42,7 +54,7 @@ static	char	*ft_make_word(char const *str, char c, int i)
 	return (word);
 }
 
-static	char	**ft_free(char **words, int j)
+static char	**ft_free(char **words, int j)
 {
 	while (j >= 0)
 		free(words[j--]);
@@ -50,7 +62,7 @@ static	char	**ft_free(char **words, int j)
 	return (NULL);
 }
 
-static	int	fill_word(char **words, const char *s, char c, int *i)
+static int	fill_word(char **words, const char *s, char c, int *i)
 {
 	while (s[*i] && s[*i] == c)
 		(*i)++;

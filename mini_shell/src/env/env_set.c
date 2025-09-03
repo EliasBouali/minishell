@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   env_set.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:39:46 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:39:48 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 static int	update_existing(t_env *node, const char *value)
 {
-	char *copy;
+	char	*copy;
 
 	if (value == NULL)
 	{
@@ -22,8 +34,8 @@ static int	update_existing(t_env *node, const char *value)
 
 static int	append_new(t_env **env, const char *name, const char *value)
 {
-	t_env *node;
-	t_env *last;
+	t_env	*node;
+	t_env	*last;
 
 	node = env_node_new(name, value);
 	if (!node)
@@ -42,7 +54,7 @@ static int	append_new(t_env **env, const char *name, const char *value)
 
 int	env_set(t_env **env, const char *name, const char *value)
 {
-	t_env *current;
+	t_env	*current;
 
 	if (!env || !name || !is_valid_name(name))
 		return (1);
@@ -51,4 +63,3 @@ int	env_set(t_env **env, const char *name, const char *value)
 		return (update_existing(current, value));
 	return (append_new(env, name, value));
 }
-

@@ -1,5 +1,16 @@
-#include "../include/minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipes_four_utils.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:47:29 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:47:30 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "../include/minishell.h"
 
 int	setup_pipes_and_pids(int n, int ***pipes_out, pid_t **pids_out)
 {

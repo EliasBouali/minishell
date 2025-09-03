@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_second_utils.c                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:46:25 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:46:26 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 void	restore_fds(int in, int out)
@@ -38,12 +50,18 @@ char	**build_child_envp(t_env *env)
 	return (envp);
 }
 
-void	child_exec_sequence(t_command *cmd, t_env *env, char *path, int path_owned)
+void	child_exec_sequence(t_command *cmd, t_env *env, char *path,
+		int path_owned)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 	if (apply_redirections(cmd, &env) == -1)
-		exit(g_exit_code ? g_exit_code : 1);
+	{
+		if (g_exit_code)
+			exit(g_exit_code);
+		else
+			exit(1);
+	}
 	execve(path, cmd->args, env_to_envp(env));
 	perror("minishell");
 	if (path_owned)

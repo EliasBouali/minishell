@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_exit.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:28:57 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:29:01 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../include/minishell.h"
 
 extern int	g_exit_code;
@@ -40,4 +52,3 @@ int	ft_exit(char **argv, t_env **env)
 		return (ft_putstr_fd("minishell: exit: too many arguments\n", 2), 1);
 	exit((unsigned char)val);
 }
-

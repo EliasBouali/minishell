@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipes_third_utils.c                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:48:01 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:48:03 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 int	wait_pipeline(pid_t *pids, int n)
@@ -39,7 +51,8 @@ int	resolve_slash_command(const char *name, char **out_path, int *path_owned)
 	return (0);
 }
 
-int	resolve_in_path(const char *name, t_env *env, char **out_path, int *path_owned)
+int	resolve_in_path(const char *name, t_env *env, char **out_path,
+		int *path_owned)
 {
 	const char	*path_var;
 	char		*path;
@@ -59,7 +72,8 @@ int	resolve_in_path(const char *name, t_env *env, char **out_path, int *path_own
 	return (0);
 }
 
-int	resolve_command(const char *name, t_env *env, char **out_path, int *path_owned)
+int	resolve_command(const char *name, t_env *env, char **out_path,
+		int *path_owned)
 {
 	if (ft_strchr(name, '/'))
 		return (resolve_slash_command(name, out_path, path_owned));

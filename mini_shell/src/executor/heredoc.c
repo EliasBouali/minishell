@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   heredoc.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:42:34 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:42:36 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
 static void	heredoc_child(const char *delim, int write_fd)
@@ -10,11 +22,11 @@ static void	heredoc_child(const char *delim, int write_fd)
 	{
 		line = readline("> ");
 		if (!line)
-			break;
+			break ;
 		if (ft_strncmp(line, delim, ft_strlen(delim) + 1) == 0)
 		{
 			free(line);
-			break;
+			break ;
 		}
 		write(write_fd, line, ft_strlen(line));
 		write(write_fd, "\n", 1);
@@ -23,7 +35,6 @@ static void	heredoc_child(const char *delim, int write_fd)
 	close(write_fd);
 	exit(0);
 }
-
 
 static int	heredoc_parent(pid_t pid, int pfd[2], int *out_fd)
 {

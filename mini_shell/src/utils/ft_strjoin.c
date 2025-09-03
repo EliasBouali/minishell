@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_strjoin.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:47:11 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:47:13 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 size_t	ft_strlen(const char *s)
@@ -35,6 +47,7 @@ size_t	ft_strlcat(char *dst, const char *src, size_t size)
 	dst[dst_len + k] = '\0';
 	return (dst_len + src_len);
 }
+
 size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 {
 	size_t	i;
@@ -58,6 +71,7 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 	dst[i] = '\0';
 	return (src_len);
 }
+
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	char	*join;

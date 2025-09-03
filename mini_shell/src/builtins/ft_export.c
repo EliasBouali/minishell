@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_export.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:29:08 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:29:11 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../include/minishell.h"
 
 static int	print_env_simple(t_env *env)
@@ -19,7 +31,8 @@ static int	print_env_simple(t_env *env)
 	return (0);
 }
 
-static int	split_name_and_value(const char *arg, char **out_name, char **out_val)
+static int	split_name_and_value(const char *arg, char **out_name,
+		char **out_val)
 {
 	size_t	i;
 
@@ -84,4 +97,3 @@ int	ft_export(char **argv, t_env **env)
 	}
 	return (exit_code);
 }
-

@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/03 19:42:29 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/03 19:42:30 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
-int	g_exit_code = 0;
+int			g_exit_code = 0;
 
 static int	check_slash_cmd_fs(const char *name)
 {
@@ -27,7 +39,6 @@ static int	check_slash_cmd_fs(const char *name)
 	return (0);
 }
 
-
 static char	*resolve_cmd_path(char *name, t_env *env, int *path_owned)
 {
 	const char	*path_var;
@@ -52,7 +63,6 @@ static char	*resolve_cmd_path(char *name, t_env *env, int *path_owned)
 	return (path);
 }
 
-
 static void	parent_after_fork(pid_t pid, char *path, int path_owned)
 {
 	int	status;
@@ -68,7 +78,8 @@ static void	parent_after_fork(pid_t pid, char *path, int path_owned)
 		g_exit_code = 1;
 }
 
-static void	spawn_and_exec(char *path, int path_owned, t_command *cmd, t_env *env)
+static void	spawn_and_exec(char *path, int path_owned, t_command *cmd,
+		t_env *env)
 {
 	pid_t	pid;
 
@@ -92,7 +103,6 @@ static void	spawn_and_exec(char *path, int path_owned, t_command *cmd, t_env *en
 		child_exec_sequence(cmd, env, path, path_owned);
 	parent_after_fork(pid, path, path_owned);
 }
-
 
 void	handle_command(t_command *cmd, t_env *env)
 {

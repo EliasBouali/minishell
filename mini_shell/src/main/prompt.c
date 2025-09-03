@@ -268,44 +268,54 @@ int execute_command_list(t_command *head, t_env *env)
     return execute_pipeline(head, env); // défini dans pipes.c
 }
 
-
-void prompt_loop(char **envp)
+static int	handle_eof(char *line)
 {
-    char     *line;
-    t_command *head;
-    t_env    *env;
+	if (line)
+		return (0);
+	ft_putendl_fd("exit", 1);
+	g_exit_code = 0;
+	return (1);
+}
 
-    env = init_env(envp);
-    if (!env)
-    {
-        ft_putstr_fd("minishell: failed to init environment\n", 2);
-        return;
-    }
-    setup_prompt_signals();
+static void	process_line(char *line, t_env *env)
+{
+	t_command	*head;
 
-    while (1)
-    {
-        line = readline("minishell$ ");
-        if (!line)
-        {
-            ft_putendl_fd("exit", 1);
-            g_exit_code = 0;
-            break;
-        }
-        if (is_blank_line(line))
-        {
-            free(line);
-            continue;
-        }
-        add_history(line);
+	if (!line)
+		return ;
+	if (is_blank_line(line))
+	{
+		free(line);
+		return ;
+	}
+	add_history(line);
+	head = NULL;
+	if (build_cmd_list_naive(line, &head) == 0)
+	{
+		execute_command_list(head, env);
+		free_cmd_list(head);
+	}
+	free(line);
+}
 
-        head = NULL;
-        if (build_cmd_list_naive(line, &head) == 0)
-        {
-            execute_command_list(head, env);
-            free_cmd_list(head);
-        }
-        free(line);
-    }
-    free_env(&env);
+void	prompt_loop(char **envp)
+{
+	char	*line;
+	t_env	*env;
+
+	env = init_env(envp);
+	if (!env)
+	{
+		ft_putstr_fd("minishell: failed to init environment\n", 2);
+		return ;
+	}
+	setup_prompt_signals();
+	while (1)
+	{
+		line = readline("minishell$ ");
+		if (handle_eof(line))
+			break ;
+		process_line(line, env);
+	}
+	free_env(&env);
 }

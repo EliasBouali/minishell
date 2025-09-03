@@ -1,107 +1,95 @@
 #include "../include/minishell.h"
 
-static int wait_pipeline(pid_t *pids, int number_of_cmd)
+typedef struct s_pipeline_ctx
 {
-  int i;
-  int status;
-  int last;
+	int		**pipes;
+	int		n;
+	t_env	*env;
+	t_command *head;
+}	t_pipeline_ctx;
 
-  i = 0;
-  status = 0;
-  last = 0;
-  while (i < number_of_cmd)
-  {
-    if (waitpid(pids[i], &status, 0) == pids[number_of_cmd - 1])
-      last = status;
-    i++;
-  }
-  if (WIFEXITED(last))
-    g_exit_code = WEXITSTATUS(last);
-  else if (WIFSIGNALED(last))
-    g_exit_code = 128 + WTERMSIG(last);
-  else
-    g_exit_code = 1;
-  return (g_exit_code);
+
+static int	setup_child_io(int idx, t_command *cmd, t_pipeline_ctx *cx)
+{
+	restore_signals_for_child();
+	connect_pipes_for_child(idx, cx->n, cx->pipes);
+	close_all_pipes(cx->pipes, cx->n);
+	free_pipes(cx->pipes, cx->n);
+	if (apply_redirections(cmd, &cx->env) == -1)
+	{
+		if (g_exit_code == 0)
+			g_exit_code = 1;
+		return (-1);
+	}
+	return (0);
 }
 
-typedef struct  s_pipeline_ctx
-{
-  int **pipes;
-  int i;
-  t_env *env;
-} t_pipeline_ctx;
 
-static void child_exec(int i, t_command *cmd, t_pipeline_ctx *cx)
+static void	child_exec(int idx, t_command *cmd, t_pipeline_ctx *cx)
 {
-    char       *name;
-    const char *path_var;
-    char       *path;
-    char      **envp_child;
-    int         rc;
+	char	*name;
+	char	*path;
+	int		own;
 
-    restore_signals_for_child();
-    connect_pipes_for_child(i, cx->i, cx->pipes);
-    close_all_pipes(cx->pipes, cx->i);
-    free_pipes(cx->pipes, cx->i);
-    if (apply_redirections(cmd, &cx->env) == -1)
-    {
-        if (g_exit_code == 0)
-            g_exit_code = 1;
-        exit(g_exit_code);
-    }
-    if (cmd && cmd->args)
-        name = cmd->args[0];
-    else
-        name = NULL;
-    if (name && cmd_is_builtin(name))
-    { rc = exec_builtin(cmd->args, &cx->env); exit(rc); }
-    if (!name || !*name) exit(0);
-    if (ft_strchr(name, '/'))
-    { rc = path_checks_for_slash_cmd(name); if (rc != 0) exit(rc); path = (char *)name; }
-    else
-    {
-        path_var = env_get(cx->env, "PATH");
-        path = get_path_to_cmd(name, path_var);
-        if (!path) { print_cmd_not_found(name); exit(127); }
-    }
-    envp_child = env_to_envp(cx->env);
-    if (!envp_child) exit(1);
-    execve(path, cmd->args, envp_child);
-    if (errno == EACCES) exit(126);
-    exit(127);
+	if (setup_child_io(idx, cmd, cx) == -1)
+		exit(g_exit_code);
+	name = NULL;
+	path = NULL;
+	own = 0;
+	if (cmd && cmd->args)
+		name = cmd->args[0];
+	if (!name || !*name)
+		exit(0);
+	if (cmd_is_builtin(name))
+		exit(exec_builtin(cmd->args, &cx->env));
+	if (resolve_command(name, cx->env, &path, &own) != 0)
+		exit(g_exit_code);
+	exec_external_child(path, cmd->args, cx->env, own);
 }
 
-int execute_pipeline(t_command *head, t_env *env)
+static int	launch_children(t_pipeline_ctx *cx, pid_t *pids)
 {
-    int       pipelines_number;
-    int     **pipes;
-    pid_t    *pids;
-    int       i;
-    t_pipeline_ctx cx;
+	int			i;
+	t_command	*cmd;
 
-    pipelines_number = count_cmd(head);
-    if (pipelines_number < 2) { handle_command(head, env); return g_exit_code; }
-    pipes = alloc_pipes(pipelines_number);
-    if ((pipelines_number > 1 && !pipes) || (pipelines_number > 1 && create_pipes(pipes, pipelines_number) < 0))
-        return (g_exit_code = 1);
-    pids = (pid_t *)malloc(sizeof(pid_t) * pipelines_number);
-    if (!pids) { close_all_pipes(pipes, pipelines_number); free_pipes(pipes, pipelines_number); return (g_exit_code = 1); }
-    cx.pipes = pipes; cx.i = pipelines_number; cx.env = env;
-    i = 0;
-    while (i < pipelines_number)
-    {
-        t_command *cmd = get_cmd_position(head, i);
-        pids[i] = fork();
-        if (pids[i] < 0)
-        { close_all_pipes(pipes, pipelines_number); while (--i >= 0) waitpid(pids[i], NULL, 0);
-          free(pids); free_pipes(pipes, pipelines_number); return (g_exit_code = 1); }
-        if (pids[i] == 0)
-            child_exec(i, cmd, &cx);
-        i++;
-    }
-    close_all_pipes(pipes, pipelines_number);
-    free_pipes(pipes, pipelines_number);
-    i = wait_pipeline(pids, pipelines_number);
-    free(pids);
-    return i;
+	i = 0;
+	while (i < cx->n)
+	{
+		cmd = get_cmd_position(cx->head, i);
+		pids[i] = fork();
+		if (pids[i] < 0)
+			return (handle_spawn_error(i, cx->n, pids, cx->pipes));
+		if (pids[i] == 0)
+			child_exec(i, cmd, cx);
+		i++;
+	}
+	return (0);
+}
+
+
+int	execute_pipeline(t_command *head, t_env *env)
+{
+	int				n;
+	int				**pipes;
+	pid_t			*pids;
+	t_pipeline_ctx	cx;
+	int				rc;
+
+	n = count_cmd(head);
+	if (n < 2)
+    return (handle_command(head, env),g_exit_code);
+	if (setup_pipes_and_pids(n, &pipes, &pids) < 0)
+		return (g_exit_code = 1);
+	cx.pipes = pipes;
+	cx.n = n;
+	cx.env = env;
+	cx.head = head;
+	rc = launch_children(&cx, pids);
+	close_all_pipes(pipes, n);
+	free_pipes(pipes, n);
+	if (rc < 0)
+    return (g_exit_code);
+	rc = wait_pipeline(pids, n);
+	free(pids);
+	return (rc);
 }

@@ -1,207 +1,115 @@
 #include "../include/minishell.h"
-int g_exit_code = 0;
 
+int	g_exit_code = 0;
 
-// but lier un dossier du path avec la commande taper par l utilisateur.
-static char *join_dir_cmd(char *path_directorie, char *cmd)
+static int	check_slash_cmd_fs(const char *name)
 {
-    char *tmp;
-    char *full;
+	struct stat	st;
 
-    tmp = ft_strjoin(path_directorie, "/");
-    if (!tmp)
-        return (NULL);
-    full = ft_strjoin(tmp, cmd);
-    free(tmp);
-    return (full);
-}
-
-//but chercher dans chaque dossier du path si le binaire existe et peut etre execute
-char *get_valid_exec_path(char **path_split, char *cmd)
-{
-    int   i;
-    char *full_path;
-
-    i = 0;
-    while (path_split && path_split[i])
-    {
-        full_path = join_dir_cmd(path_split[i], cmd);
-        if (!full_path)
-        {
-            free_split(path_split);
-            return (NULL);
-        }
-        if (access(full_path, X_OK) == 0)
-        {
-            free_split(path_split);
-            return (full_path);
-        }
-        free(full_path);
-        i++;
-    }
-    free_split(path_split);
-    return (NULL);
-}
-
-// envoi la chaine path decoupe a get_valid_exec_path
-char *get_path_to_cmd(char *cmd, const char *path_var)
-{
-    char **path_split;
-
-    if (!path_var || !*path_var)
-        return (NULL);
-    path_split = ft_split(path_var, ':');
-    if (!path_split)
-        return (NULL);
-    return (get_valid_exec_path(path_split, cmd));
-}
-
-void handle_command(t_command *cmd, t_env *env)
-{
-    char        *path;
-    pid_t       pid;
-    char        *cmd_name;
-    const char  *path_var;
-    char        **envp_child;
-    int         status;
-
-    if (!cmd || !cmd->args || !cmd->args[0])
-        return;
-    cmd_name = cmd->args[0];
-    if (cmd_is_builtin(cmd_name))
-    {
-        int save_in;
-        int save_out;
-        int rc;
-
-        save_in = dup(STDIN_FILENO);
-        save_out = dup(STDOUT_FILENO);
-        if (save_in == -1 || save_out == -1)
-        {
-            perror("minishell: dup");
-            if (save_in != -1) close(save_in);
-            if (save_out != -1) close(save_out);
-            g_exit_code = 1;
-            return;
-        }
-        /* Appliquer toutes les redirections (gère aussi << via open_heredoc) */
-        if (apply_redirections(cmd, &env) == -1)
-        {
-            /* Échec d’ouverture/dup2 : restaurer et sortir (g_exit_code déjà fixé) */
-            if (dup2(save_in, STDIN_FILENO) == -1) perror("minishell: dup2");
-            if (dup2(save_out, STDOUT_FILENO) == -1) perror("minishell: dup2");
-            close(save_in);
-            close(save_out);
-            return;
-        }
-        rc = exec_builtin(cmd->args, &env); /* doit retourner et/ou mettre g_exit_code */
-        /* Restaurer FDs du shell */
-        if (dup2(save_in, STDIN_FILENO) == -1) perror("minishell: dup2");
-        if (dup2(save_out, STDOUT_FILENO) == -1) perror("minishell: dup2");
-        close(save_in);
-        close(save_out);
-        g_exit_code = rc;
-        return;
-    }
-    if (ft_strchr(cmd_name, '/'))
-    {
-        struct stat st;
-
-        if (access(cmd_name, F_OK) != 0)
-        {
-            ft_putstr_fd("minishell: ", 2);
-            ft_putstr_fd(cmd_name, 2);
-            ft_putendl_fd(": No such file or directory", 2);
-            g_exit_code = 127;
-            return;
-        }
-        if (stat(cmd_name, &st) == 0 && S_ISDIR(st.st_mode))
-        {
-            ft_putstr_fd("minishell: ", 2);
-            ft_putstr_fd(cmd_name, 2);
-            ft_putendl_fd(": Is a directory", 2);
-            g_exit_code = 126;
-            return;
-        }
-        if (access(cmd_name, X_OK) != 0)
-        {
-            ft_putstr_fd("minishell: ", 2);
-            ft_putstr_fd(cmd_name, 2);
-            ft_putendl_fd(": Permission denied", 2);
-            g_exit_code = 126;
-            return;
-        }
-        path = cmd_name;
-    }
-    else
-    {
-        path_var = env_get(env, "PATH");
-        path = get_path_to_cmd(cmd->args[0], path_var);
-        if (!path)
-        {
-            ft_putstr_fd("minishell: ", 2);
-            ft_putstr_fd(cmd_name, 2);
-            ft_putendl_fd(": command not found", 2);
-            g_exit_code = 127;
-            return;
-        }
-    }
-    envp_child = env_to_envp(env);
-    if (!envp_child)
-    {
-        ft_putstr_fd("minishell: env alloc error\n", 2);
-        if (path != cmd_name)
-            free(path);
-        g_exit_code = 1;
-        return;
-    }
-    pid = fork();
-    if (pid == -1)
-    {
-        perror("minishell");
-        if (path != cmd_name)
-            free(path);
-        free_envp_array(envp_child);
-        g_exit_code = 1;
-        return;
-    }
-    if (pid == 0)
-    {
-        signal(SIGINT, SIG_DFL);
-        signal(SIGQUIT, SIG_DFL);
-        if (apply_redirections(cmd, &env) == -1)
-          _exit(g_exit_code ? g_exit_code : 1);
-        execve(path, cmd->args, envp_child);
-        perror("minishell");
-        free_envp_array(envp_child);
-        if (path != cmd_name)
-            free(path);
-        _exit(126);
-    }
-    free_envp_array(envp_child);
-    if (path != cmd_name)
-        free(path);
-    status = 0;
-    waitpid(pid, &status, 0);
-    if (WIFEXITED(status))
-        g_exit_code = WEXITSTATUS(status);
-    else if (WIFSIGNALED(status))
-        g_exit_code = 128 + WTERMSIG(status);
-}
-
-
-/*
-char *get_env(char *nam, char **env)
-{
-	int i = 0;
-	size_t len = ft_strlen(nam);
-
-	while (env && env[i])
+	if (access(name, F_OK) != 0)
 	{
-		if (ft_strncmp(env[i], nam, len) == 0 && env[i][len] == '=')
-			return (env[i] + len + 1);
-		i++;
+		print_error(name, ": No such file or directory");
+		g_exit_code = 127;
+		return (-1);
 	}
-	return (NULL);
+	if (stat(name, &st) == 0 && S_ISDIR(st.st_mode))
+	{
+		print_error(name, ": Is a directory");
+		g_exit_code = 126;
+		return (-1);
+	}
+	if (access(name, X_OK) != 0)
+	{
+		print_error(name, ": Permission denied");
+		g_exit_code = 126;
+		return (-1);
+	}
+	return (0);
 }
-*/
+
+
+static char	*resolve_cmd_path(char *name, t_env *env, int *path_owned)
+{
+	const char	*path_var;
+	char		*path;
+
+	*path_owned = 0;
+	if (ft_strchr(name, '/'))
+	{
+		if (check_slash_cmd_fs(name) < 0)
+			return (NULL);
+		return (name);
+	}
+	path_var = env_get(env, "PATH");
+	path = get_path_to_cmd(name, path_var);
+	if (!path)
+	{
+		print_error(name, ": command not found");
+		g_exit_code = 127;
+		return (NULL);
+	}
+	*path_owned = 1;
+	return (path);
+}
+
+
+static void	parent_after_fork(pid_t pid, char *path, int path_owned)
+{
+	int	status;
+
+	waitpid(pid, &status, 0);
+	if (path_owned)
+		free(path);
+	if (WIFEXITED(status))
+		g_exit_code = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+		g_exit_code = 128 + WTERMSIG(status);
+	else
+		g_exit_code = 1;
+}
+
+static void	spawn_and_exec(char *path, int path_owned, t_command *cmd, t_env *env)
+{
+	pid_t	pid;
+
+	if (!build_child_envp(env))
+	{
+		if (path_owned)
+			free(path);
+		g_exit_code = 1;
+		return ;
+	}
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("minishell");
+		if (path_owned)
+			free(path);
+		g_exit_code = 1;
+		return ;
+	}
+	if (pid == 0)
+		child_exec_sequence(cmd, env, path, path_owned);
+	parent_after_fork(pid, path, path_owned);
+}
+
+
+void	handle_command(t_command *cmd, t_env *env)
+{
+	char	*name;
+	char	*path;
+	int		path_owned;
+
+	if (!cmd || !cmd->args || !cmd->args[0])
+		return ;
+	name = cmd->args[0];
+	if (cmd_is_builtin(name))
+	{
+		g_exit_code = run_builtin_in_parent(cmd, &env);
+		return ;
+	}
+	path = resolve_cmd_path(name, env, &path_owned);
+	if (!path)
+		return ;
+	spawn_and_exec(path, path_owned, cmd, env);
+}

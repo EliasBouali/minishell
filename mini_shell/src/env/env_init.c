@@ -1,7 +1,6 @@
 #include "../include/minishell.h"
 
-
-static char	*dup_n_in_s(const char *s, size_t n)
+static char	*dup_n_in_string(const char *s, size_t n)
 {
 	char	*dst;
 	size_t	i;
@@ -19,46 +18,52 @@ static char	*dup_n_in_s(const char *s, size_t n)
 	return (dst);
 }
 
+static int	parse_line(const char *line, char **out_name, const char **out_value)
+{
+	const char	*equal_sign;
 
-//analyse une ligne d environnement au fomrat name=value ou name sans =
+	equal_sign = ft_strchr(line, '=');
+	*out_name = NULL;
+	*out_value = NULL;
+	if (!equal_sign)
+	{
+		*out_name = ft_strdup(line);
+		if (*out_name)
+			return (1);
+		return (0);
+	}
+	*out_name = dup_n_in_string(line, (size_t)(equal_sign - line));
+	*out_value = equal_sign + 1;
+	if (*out_name)
+		return (1);
+	return (0);
+}
+
 static int	add_one_entry(t_env **env, const char *line)
 {
-	const char	*eq_pos;
 	char		*name;
-	const char	*value_ptr;
-	int			set_result;
+	const char	*val;
+	int			status;
 
-	eq_pos = ft_strchr(line, '=');
-	if (!eq_pos)
-	{
-		name = ft_strdup(line);
-		value_ptr = NULL;
-	}
-	else
-	{
-		name = dup_n_in_s(line, (size_t)(eq_pos - line));
-		value_ptr = eq_pos + 1;
-	}
-	if (!name)
+	if (!parse_line(line, &name, &val))
 		return (2);
 	if (!is_valid_name(name))
 	{
 		free(name);
 		return (0);
 	}
-	set_result = env_set(env, name, value_ptr);
+	status = env_set(env, name, val);
 	free(name);
-	if (set_result == 2)
+	if (status == 2)
 		return (2);
 	return (0);
 }
-
 
 t_env	*init_env(char **envp_src)
 {
 	t_env	*env;
 	int		i;
-	int		value_ret;
+	int		status;
 
 	env = NULL;
 	if (!envp_src)
@@ -66,8 +71,8 @@ t_env	*init_env(char **envp_src)
 	i = 0;
 	while (envp_src[i])
 	{
-		value_ret = add_one_entry(&env, envp_src[i]);
-		if (value_ret == 2)
+		status = add_one_entry(&env, envp_src[i]);
+		if (status == 2)
 		{
 			free_env(&env);
 			return (NULL);
@@ -76,3 +81,4 @@ t_env	*init_env(char **envp_src)
 	}
 	return (env);
 }
+

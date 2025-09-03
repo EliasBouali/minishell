@@ -1,72 +1,85 @@
 #include "../include/minishell.h"
 
-static int	make_name_value_pair(char *dst, const char *name, const char *value)
+static size_t	count_pairs(t_env *env)
 {
-	size_t	i;
-	size_t	j;
+	size_t	n;
 
-	i = 0;
-	j = 0;
-	while (name[i])
+	n = 0;
+	while (env)
 	{
-		dst[j] = name[i];
-		i++;
-		j++;
+		if (env->value != NULL)
+			n++;
+		env = env->next;
 	}
-	dst[j] = '=';
-	j++;
-	i = 0;
-	while (value[i])
-	{
-		dst[j] = value[i];
-		i++;
-		j++;
-	}
-	dst[j] = '\0';
-	return (0);
+	return (n);
 }
 
-char	**env_to_envp(t_env *env)
+static void	copy_str(char *dst, const char *src, size_t *j)
 {
-	size_t	count;
-	t_env	*cur;
-	char	**arr;
 	size_t	i;
+
+	i = 0;
+	while (src[i])
+	{
+		dst[*j] = src[i];
+		(*j)++;
+		i++;
+	}
+}
+
+static void	make_name_value_pair(char *dst, const char *name, const char *value)
+{
+	size_t	j;
+
+	j = 0;
+	copy_str(dst, name, &j);
+	dst[j] = '=';
+	j++;
+	copy_str(dst, value, &j);
+	dst[j] = '\0';
+}
+
+static char	*alloc_and_fill_entry(const char *name, const char *value)
+{
 	size_t	name_len;
 	size_t	value_len;
 	char	*buf;
 
-	count = 0;
-	cur = env;
-	while (cur)
-	{
-		if (cur->value != NULL)
-			count++;
-		cur = cur->next;
-	}
+	name_len = ft_strlen(name);
+	value_len = ft_strlen(value);
+	buf = (char *)malloc(name_len + 1 + value_len + 1);
+	if (!buf)
+		return (NULL);
+	make_name_value_pair(buf, name, value);
+	return (buf);
+}
+
+char	**env_to_envp(t_env *env)
+{
+	char	**arr;
+	size_t	count;
+	size_t	i;
+
+	count = count_pairs(env);
 	arr = (char **)malloc(sizeof(char *) * (count + 1));
 	if (!arr)
 		return (NULL);
 	i = 0;
-	cur = env;
-	while (cur)
+	while (env)
 	{
-		if (cur->value != NULL)
+		if (env->value != NULL)
 		{
-			name_len = ft_strlen(cur->name);
-			value_len = ft_strlen(cur->value);
-			buf = (char *)malloc(name_len + 1 + value_len + 1);
-			if (!buf)
+			arr[i] = alloc_and_fill_entry(env->name, env->value);
+			if (!arr[i])
 			{
 				free_envp_array(arr);
 				return (NULL);
 			}
-			make_name_value_pair(buf, cur->name, cur->value);
-			arr[i] = buf;
 			i++;
 		}
-		cur = cur->next;
+		env = env->next;
 	}
 	arr[i] = NULL;
 	return (arr);
 }
+

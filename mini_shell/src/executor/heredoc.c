@@ -1,65 +1,71 @@
 #include "../include/minishell.h"
 
-
-int open_heredoc(const char *delimiteur, int *out_fd, t_env **env)
+static void	heredoc_child(const char *delim, int write_fd)
 {
-    int   pfd[2];
-    pid_t pid;
+	char	*line;
 
-    (void)env;
-    if (pipe(pfd) == -1)
-    {
-        perror("minishell: pipe");
-        return (-1);
-    }
-    
-    pid = fork();
-    if (pid == -1)
-    {
-        perror("minishell: fork");
-        close(pfd[0]);
-        close(pfd[1]);
-        return (-1);
-    }
-    if (pid == 0)
-    {
-        char *line;
-        signal(SIGINT, SIG_DFL);
-        signal(SIGQUIT, SIG_IGN);
-        close(pfd[0]);
-        while (1)
-        {
-            line = readline("> ");
-            if (!line
-                || ft_strncmp(line, delimiteur, ft_strlen(delimiteur) + 1) == 0)
-            {
-                free(line);
-                break;
-            }
-            write(pfd[1], line, ft_strlen(line));
-            write(pfd[1], "\n", 1);
-            free(line);
-        }
-        close(pfd[1]);
-        exit(0);
-    }
-    else
-    {
-        int status;
-        close(pfd[1]);
-        if (waitpid(pid, &status, 0) == -1)
-        {
-            perror("minishell: waitpid");
-            close(pfd[0]);
-            return (-1);
-        }
-        if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
-        {
-            g_exit_code = 130;
-            close(pfd[0]);
-            return (-1);
-        }
-        *out_fd = pfd[0];
-        return (0);
-    }
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_IGN);
+	while (1)
+	{
+		line = readline("> ");
+		if (!line)
+			break;
+		if (ft_strncmp(line, delim, ft_strlen(delim) + 1) == 0)
+		{
+			free(line);
+			break;
+		}
+		write(write_fd, line, ft_strlen(line));
+		write(write_fd, "\n", 1);
+		free(line);
+	}
+	close(write_fd);
+	exit(0);
+}
+
+
+static int	heredoc_parent(pid_t pid, int pfd[2], int *out_fd)
+{
+	int	status;
+
+	close(pfd[1]);
+	if (waitpid(pid, &status, 0) == -1)
+	{
+		perror("minishell: waitpid");
+		close(pfd[0]);
+		return (-1);
+	}
+	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+	{
+		g_exit_code = 130;
+		close(pfd[0]);
+		return (-1);
+	}
+	*out_fd = pfd[0];
+	return (0);
+}
+
+int	open_heredoc(const char *delimiter, int *out_fd, t_env **env)
+{
+	int		pfd[2];
+	pid_t	pid;
+
+	(void)env;
+	if (pipe(pfd) == -1)
+	{
+		perror("minishell: pipe");
+		return (-1);
+	}
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("minishell: fork");
+		close(pfd[0]);
+		close(pfd[1]);
+		return (-1);
+	}
+	if (pid == 0)
+		heredoc_child(delimiter, pfd[1]);
+	return (heredoc_parent(pid, pfd, out_fd));
 }

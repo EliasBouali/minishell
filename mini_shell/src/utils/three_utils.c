@@ -57,3 +57,47 @@ void free_envp_array(char **arr)
     }
     free(arr);
 }
+void    *ft_memcpy(void *dst, const void *src, size_t n)
+{
+    unsigned char           *d;
+    const unsigned char     *s;
+
+    if (!dst && !src)
+        return (NULL);
+    d = (unsigned char *)dst;
+    s = (const unsigned char *)src;
+    while (n > 0)
+    {
+        *d = *s;
+        d++;
+        s++;
+        n--;
+    }
+    return (dst);
+}
+
+long long	ft_atoll(const char *str)
+{
+	int			i;
+	int			sign;
+	long long	result;
+
+	i = 0;
+	sign = 1;
+	result = 0;
+	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
+		i++;
+	if (str[i] == '+' || str[i] == '-')
+	{
+		if (str[i] == '-')
+			sign = -1;
+		i++;
+	}
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		result = result * 10 + (str[i] - '0');
+		i++;
+	}
+	return (result * sign);
+}
+

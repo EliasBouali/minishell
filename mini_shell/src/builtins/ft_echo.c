@@ -1,24 +1,19 @@
-#include "../include/minishell.h"
+#include "../../include/minishell.h"
 
-int ft_echo(char **argv, t_env **env)
+static int is_n_flag(const char *s)
 {
   int i;
-  int new_line;
-  int j;
 
-  i = 1;
-  new_line = 1;
-  (void)env;
-  while (argv[i] && argv[i][0] == '-' && argv[i][1] == 'n')
-  {
-    j = 2;
-    while(argv[i][j] == 'n')
-      j++;
-    if (argv[i][j] != '\0')
-      break;
-    new_line = 0;
+  if (!s || s[0] != '-' || s[1] != 'n')
+    return (0);
+  i = 2;
+  while (s[i] == 'n')
     i++;
-  }
+  return (s[i] == '\0');
+}
+
+static void print_args(char **argv, int i)
+{
   while (argv[i])
   {
     ft_putstr_fd(argv[i], 1);
@@ -26,7 +21,23 @@ int ft_echo(char **argv, t_env **env)
       ft_putstr_fd(" ", 1);
     i++;
   }
-  if (new_line)
-    ft_putstr_fd("\n", 1);
-    return 0;
+}
+
+int	ft_echo(char **argv, t_env **env)
+{
+	int i;
+	int new_line;
+
+	(void)env;
+	i = 1;
+	new_line = 1;
+	while (argv[i] && is_n_flag(argv[i]))
+	{
+		new_line = 0;
+		i++;
+	}
+	print_args(argv, i);
+	if (new_line)
+		ft_putstr_fd("\n", 1);
+	return (0);
 }

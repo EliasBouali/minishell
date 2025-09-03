@@ -1,117 +1,87 @@
 #include "../../include/minishell.h"
 
-
-static int print_env_from_tenv(t_env *env)
+static int	print_env_simple(t_env *env)
 {
-    t_env *cur;
+	t_env	*cur;
 
-    cur = env;
-    while (cur)
-    {
-        if (cur->value != NULL)
-        {
-            ft_putstr_fd(cur->name, 1);
-            ft_putstr_fd("=", 1);
-            ft_putstr_fd(cur->value, 1);
-            ft_putstr_fd("\n", 1);
-        }
-        cur = cur->next;
-    }
-    return (0);
+	cur = env;
+	while (cur)
+	{
+		if (cur->value)
+		{
+			ft_putstr_fd(cur->name, 1);
+			ft_putstr_fd("=", 1);
+			ft_putstr_fd(cur->value, 1);
+			ft_putstr_fd("\n", 1);
+		}
+		cur = cur->next;
+	}
+	return (0);
 }
 
-
-static int split_name_value(const char *arg, char **name_out, char **value_out)
+static int	split_name_and_value(const char *arg, char **out_name, char **out_val)
 {
-    size_t  i;
-    size_t  j;
-    char    *name;
-    char    *value;
+	size_t	i;
 
-    if (!arg || !name_out || !value_out)
-        return (0);
-    i = 0;
-    while (arg[i] && arg[i] != '=')
-        i++;
-    if (arg[i] == '=')
-    {
-        name = (char *)malloc(i + 1);
-        if (!name)
-            return (0);
-        j = 0;
-        while (j < i)
-        {
-            name[j] = arg[j];
-            j++;
-        }
-        name[i] = '\0';
-        value = ft_strdup(arg + i + 1);
-        if (!value)
-        {
-            free(name);
-            return (0);
-        }
-        *name_out = name;
-        *value_out = value;
-        return (1);
-    }
-    name = ft_strdup(arg);
-    if (!name)
-        return (0);
-    *name_out = name;
-    *value_out = NULL;
-    return (1);
+	*out_name = NULL;
+	*out_val = NULL;
+	i = 0;
+	while (arg[i] && arg[i] != '=')
+		i++;
+	*out_name = (char *)malloc(i + 1);
+	if (!*out_name)
+		return (0);
+	ft_memcpy(*out_name, arg, i);
+	(*out_name)[i] = '\0';
+	if (arg[i] == '=')
+	{
+		*out_val = ft_strdup(arg + i + 1);
+		if (!*out_val)
+			return (free(*out_name), *out_name = NULL, 0);
+	}
+	return (1);
 }
 
-static void print_export_invalid(const char *arg)
+static int	export_one_var(const char *arg, t_env **env)
 {
-    ft_putstr_fd("minishell: export: `", 2);
-    ft_putstr_fd((char *)arg, 2);
-    ft_putstr_fd("': not a valid identifier\n", 2);
+	char	*name;
+	char	*value;
+	int		ret;
+
+	if (!split_name_and_value(arg, &name, &value))
+		return (ft_putstr_fd("minishell: export: alloc error\n", 2), 1);
+	if (!is_valid_name(name))
+	{
+		ft_putstr_fd("minishell: export: `", 2);
+		ft_putstr_fd((char *)arg, 2);
+		ft_putstr_fd("': not a valid identifier\n", 2);
+		return (free(name), free(value), 1);
+	}
+	ret = env_set(env, name, value);
+	free(name);
+	free(value);
+	if (ret == 2)
+		return (ft_putstr_fd("minishell: export: alloc error\n", 2), 1);
+	return (0);
 }
 
-int ft_export(char **argv, t_env **env)
+int	ft_export(char **argv, t_env **env)
 {
-    int   i;
-    int   exit_code;
-    char *name;
-    char *value;
-    int   rc;
+	int	i;
+	int	exit_code;
 
-    if (!env)
-        return (1);
-    if (!argv || !argv[1])
-        return print_env_from_tenv(*env);
-    exit_code = 0;
-    i = 1;
-    while (argv[i])
-    {
-        if (!split_name_value(argv[i], &name, &value))
-        {
-            ft_putstr_fd("minishell: export: allocation error\n", 2);
-            exit_code = 1;
-            i++;
-            continue;
-        }
-        if (!is_valid_name((const char *)name))
-        {
-            print_export_invalid(argv[i]);
-            exit_code = 1;
-        }
-        else
-        {
-            rc = env_set(env, (const char *)name, (const char *)value);
-            if (rc == 2)
-            {
-                ft_putstr_fd("minishell: export: allocation error\n", 2);
-                exit_code = 1;
-            }
-        }
-        if (name)
-            free(name);
-        if (value)
-            free(value);
-        i++;
-    }
-    return (exit_code);
+	if (!env)
+		return (1);
+	if (!argv || !argv[1])
+		return (print_env_simple(*env));
+	exit_code = 0;
+	i = 1;
+	while (argv[i])
+	{
+		if (export_one_var(argv[i], env))
+			exit_code = 1;
+		i++;
+	}
+	return (exit_code);
 }
+

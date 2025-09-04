@@ -45,6 +45,15 @@ typedef struct s_command
   struct s_command *next;
 }       t_command;
 
+typedef struct s_linebuf
+{
+	char	*buf;
+	size_t	len;
+	size_t	cap;
+}	t_linebuf;
+
+
+#define HD_INIT_CAP 64;
 
 extern int g_exit_code;
 
@@ -157,6 +166,20 @@ void	child_exec_sequence(t_command *cmd, t_env *env, char *path, int path_owned)
 
 // fonction dans le dossier executor fichier pipes.c:
 int execute_pipeline(t_command *head, t_env *env);
+
+// fonction dans le dossier utils.c fichier heredoc_utils.c:
+int		buf_n_equal(const char *s1, const char *s2, size_t n);
+int	line_buffer_grow(t_linebuf *line_buffer);
+int	line_buffer_push_char(t_linebuf *line_buffer, char c);
+int	line_is_delim(const char *line, size_t line_len, const char *delim);
+int	feed_line_buffer(const char *buf, ssize_t n,
+							t_linebuf *line_buffer, int write_file_descriptor, const char *delim);
+
+// fonction dans le dossier utils fichier heredoc_second_utils.c:
+void	write_prompt(void);
+void	write_line_and_reset(t_linebuf *line_buffer, int write_file_descriptor);
+void	heredoc_init(t_linebuf *line_buffer);
+
 
 // parsing de chat gpt:
 int  build_cmd_list_naive(const char *line, t_command **out_head);

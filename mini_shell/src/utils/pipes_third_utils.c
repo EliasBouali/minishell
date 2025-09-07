@@ -86,12 +86,18 @@ void	exec_external_child(char *path, char **argv, t_env *env, int own)
 
 	envp = env_to_envp(env);
 	if (!envp)
-		_exit(1);
+	{
+		if (own)
+			free(path);
+		exit(1);
+	}
 	execve(path, argv, envp);
 	if (own)
 		free(path);
 	free_envp_array(envp);
 	if (errno == EACCES)
-		_exit(126);
-	_exit(127);
+		exit(126);
+	if (errno == ENOENT)
+		exit(127);
+	exit(126);
 }

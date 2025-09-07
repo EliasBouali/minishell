@@ -12,14 +12,6 @@
 
 #include "../include/minishell.h"
 
-typedef struct s_pipeline_ctx
-{
-	int			**pipes;
-	int			n;
-	t_env		*env;
-	t_command	*head;
-}				t_pipeline_ctx;
-
 static int	setup_child_io(int idx, t_command *cmd, t_pipeline_ctx *cx)
 {
 	restore_signals_for_child();

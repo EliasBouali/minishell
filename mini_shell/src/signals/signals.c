@@ -29,12 +29,10 @@ void	setup_prompt_signals(void)
 	struct sigaction	sa_int;
 	struct sigaction	sa_quit;
 
-	// SIGINT
 	sa_int.sa_handler = prompt_signal_handler;
 	sigemptyset(&sa_int.sa_mask);
 	sa_int.sa_flags = SA_RESTART;
 	sigaction(SIGINT, &sa_int, NULL);
-	// SIGQUIT
 	sa_quit.sa_handler = SIG_IGN;
 	sigemptyset(&sa_quit.sa_mask);
 	sa_quit.sa_flags = 0;

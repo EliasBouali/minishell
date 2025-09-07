@@ -12,25 +12,29 @@
 
 #include "../include/minishell.h"
 
-
-static int	heredoc_read_loop(const char *delim, int write_fd, t_linebuf *line_buffer)
+static int	heredoc_read_loop(const char *delim, int write_fd,
+		t_linebuf *line_buffer)
 {
-	char	buf[1024];
-	ssize_t	bytes_read;
-	int		chunk_status;
+	char		buf[1024];
+	ssize_t		bytes_read;
+	int			chunk_status;
+	t_feed_ctx	ctx;
 
-	while ((bytes_read = read(STDIN_FILENO, buf, sizeof(buf))) > 0)
+	ctx.line_buffer = line_buffer;
+	ctx.write_fd = write_fd;
+	ctx.delim = delim;
+	bytes_read = read(STDIN_FILENO, buf, sizeof(buf));
+	while (bytes_read > 0)
 	{
-		chunk_status = feed_line_buffer(buf, bytes_read, line_buffer, write_fd, delim);
+		chunk_status = feed_line_buffer(buf, bytes_read, &ctx);
 		if (chunk_status == 1)
 			return (0);
 		if (chunk_status == -1)
 			return (-1);
+		bytes_read = read(STDIN_FILENO, buf, sizeof(buf));
 	}
 	return (0);
 }
-
-
 
 static void	heredoc_child(const char *delim, int write_fd)
 {
@@ -47,9 +51,6 @@ static void	heredoc_child(const char *delim, int write_fd)
 		exit(1);
 	exit(0);
 }
-
-
-
 
 static int	heredoc_parent(pid_t pid, int pfd[2], int *out_fd)
 {
@@ -77,8 +78,6 @@ static int	heredoc_parent(pid_t pid, int pfd[2], int *out_fd)
 	*out_fd = pfd[0];
 	return (0);
 }
-
-
 
 int	open_heredoc(const char *delimiter, int *out_fd, t_env **env)
 {

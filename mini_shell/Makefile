@@ -34,6 +34,7 @@ SRCS := \
 	$(UTILSDIR)/pipes_four_utils.c \
 	$(UTILSDIR)/exec_utils.c \
 	$(UTILSDIR)/exec_second_utils.c \
+  $(UTILSDIR)/exec_third_utils.c \
 	$(UTILSDIR)/heredoc_utils.c \
 	$(UTILSDIR)/heredoc_second_utils.c \
   $(UTILSDIR)/ft_split.c \

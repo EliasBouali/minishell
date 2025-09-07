@@ -68,3 +68,28 @@ void	child_exec_sequence(t_command *cmd, t_env *env, char *path,
 		free(path);
 	exit(126);
 }
+int	check_slash_cmd_fs(const char *name)
+{
+	struct stat	st;
+
+	if (access(name, F_OK) != 0)
+	{
+		print_error(name, ": No such file or directory");
+		g_exit_code = 127;
+		return (-1);
+	}
+	if (stat(name, &st) == 0 && S_ISDIR(st.st_mode))
+	{
+		print_error(name, ": Is a directory");
+		g_exit_code = 126;
+		return (-1);
+	}
+	if (access(name, X_OK) != 0)
+	{
+		print_error(name, ": Permission denied");
+		g_exit_code = 126;
+		return (-1);
+	}
+	return (0);
+}
+

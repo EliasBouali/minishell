@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   heredoc_utils.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/07 15:15:02 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/07 15:15:04 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/minishell.h"
 
-int		buf_n_equal(const char *s1, const char *s2, size_t n)
+int	buf_n_equal(const char *s1, const char *s2, size_t n)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (i < n)
@@ -56,7 +68,7 @@ int	line_buffer_push_char(t_linebuf *line_buffer, char c)
 
 int	line_is_delim(const char *line, size_t line_len, const char *delim)
 {
-	size_t delim_len;
+	size_t	delim_len;
 
 	delim_len = ft_strlen(delim);
 	if (line_len != delim_len)
@@ -64,8 +76,7 @@ int	line_is_delim(const char *line, size_t line_len, const char *delim)
 	return (buf_n_equal(line, delim, delim_len));
 }
 
-int	feed_line_buffer(const char *buf, ssize_t n,
-							t_linebuf *line_buffer, int write_file_descriptor, const char *delim)
+int	feed_line_buffer(const char *buf, ssize_t n, t_feed_ctx *ctx)
 {
 	ssize_t	i;
 
@@ -76,16 +87,17 @@ int	feed_line_buffer(const char *buf, ssize_t n,
 		{
 			if (buf[i] == '\r' && (i + 1) < n && buf[i + 1] == '\n')
 				i++;
-			if (line_is_delim(line_buffer->buf, line_buffer->len, delim))
+			if (line_is_delim(ctx->line_buffer->buf,
+					ctx->line_buffer->len, ctx->delim))
 				return (1);
-			write_line_and_reset(line_buffer, write_file_descriptor);
+			write_line_and_reset(ctx->line_buffer, ctx->write_fd);
 			if (buf[i] == '\r')
 				(void)!write(STDOUT_FILENO, "\n", 1);
 			write_prompt();
 		}
 		else
 		{
-			if (line_buffer_push_char(line_buffer, buf[i]) == -1)
+			if (line_buffer_push_char(ctx->line_buffer, buf[i]) == -1)
 				return (-1);
 		}
 		i++;

@@ -14,34 +14,10 @@
 
 int			g_exit_code = 0;
 
-static int	check_slash_cmd_fs(const char *name)
-{
-	struct stat	st;
-
-	if (access(name, F_OK) != 0)
-	{
-		print_error(name, ": No such file or directory");
-		g_exit_code = 127;
-		return (-1);
-	}
-	if (stat(name, &st) == 0 && S_ISDIR(st.st_mode))
-	{
-		print_error(name, ": Is a directory");
-		g_exit_code = 126;
-		return (-1);
-	}
-	if (access(name, X_OK) != 0)
-	{
-		print_error(name, ": Permission denied");
-		g_exit_code = 126;
-		return (-1);
-	}
-	return (0);
-}
-
 static char	*resolve_cmd_path(char *name, t_env *env, int *path_owned)
 {
 	const char	*path_var;
+	char		**dirs;
 	char		*path;
 
 	*path_owned = 0;
@@ -52,14 +28,14 @@ static char	*resolve_cmd_path(char *name, t_env *env, int *path_owned)
 		return (name);
 	}
 	path_var = env_get(env, "PATH");
-	path = get_path_to_cmd(name, path_var);
+	if (!path_var || !*path_var)
+		return (cmd_not_found(name));
+	dirs = ft_split(path_var, ':');
+	if (!dirs)
+		return (alloc_fail());
+	path = path_from_dirs(name, dirs, path_owned);
 	if (!path)
-	{
-		print_error(name, ": command not found");
-		g_exit_code = 127;
-		return (NULL);
-	}
-	*path_owned = 1;
+		return (cmd_not_found(name));
 	return (path);
 }
 
@@ -83,13 +59,6 @@ static void	spawn_and_exec(char *path, int path_owned, t_command *cmd,
 {
 	pid_t	pid;
 
-	if (!build_child_envp(env))
-	{
-		if (path_owned)
-			free(path);
-		g_exit_code = 1;
-		return ;
-	}
 	pid = fork();
 	if (pid < 0)
 	{

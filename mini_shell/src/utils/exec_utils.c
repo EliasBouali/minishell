@@ -19,7 +19,7 @@ void	print_error(const char *name, const char *msg)
 	ft_putendl_fd((char *)msg, 2);
 }
 
-char	*join_dir_cmd(char *dir, char *cmd)
+static char	*join_dir_cmd(const char *dir, const char *cmd)
 {
 	char	*tmp;
 	char	*full;
@@ -38,13 +38,21 @@ char	*get_valid_exec_path(char **path_split, char *cmd)
 	char	*full;
 
 	i = 0;
-	while (path_split && path_split[i])
+	if (!path_split)
+		return (NULL);
+	while (path_split[i])
 	{
 		full = join_dir_cmd(path_split[i], cmd);
 		if (!full)
-			return (free_split(path_split), NULL);
+		{
+			free_split(path_split);
+			return (NULL);
+		}
 		if (access(full, X_OK) == 0)
-			return (free_split(path_split), full);
+		{
+			free_split(path_split);
+			return (full);
+		}
 		free(full);
 		i++;
 	}
@@ -52,16 +60,36 @@ char	*get_valid_exec_path(char **path_split, char *cmd)
 	return (NULL);
 }
 
+static char	*ret_cand_free_dirs(char *cand, char **dirs)
+{
+	free_split(dirs);
+	return (cand);
+}
+
 char	*get_path_to_cmd(char *cmd, const char *path_var)
 {
-	char	**split;
+	char	**dirs;
+	char	*cand;
+	int		i;
 
-	if (!path_var || !*path_var)
+	if (!cmd || !path_var || !*path_var)
 		return (NULL);
-	split = ft_split(path_var, ':');
-	if (!split)
+	dirs = ft_split(path_var, ':');
+	if (!dirs)
 		return (NULL);
-	return (get_valid_exec_path(split, cmd));
+	i = 0;
+	while (dirs[i])
+	{
+		cand = join_dir_cmd(dirs[i], cmd);
+		if (!cand)
+			break ;
+		if (access(cand, X_OK) == 0)
+			return (ret_cand_free_dirs(cand, dirs));
+		free(cand);
+		i++;
+	}
+	free_split(dirs);
+	return (NULL);
 }
 
 int	save_fds(int *in, int *out)

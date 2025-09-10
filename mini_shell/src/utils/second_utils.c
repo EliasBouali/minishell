@@ -42,3 +42,42 @@ int	is_blank_line(char *s)
 	}
 	return (1);
 }
+
+char	*ft_strndup(const char *s, size_t end)
+{
+	size_t	i;
+	char	*dest;
+
+	if (!s)
+		return (NULL);
+	if (end == 0)
+	{
+		dest = malloc(sizeof(char));
+		if (!dest)
+			return (NULL);
+		dest[0] = '\0';
+		return (dest);
+	}
+	dest = malloc((end + 1) * sizeof(char));
+	if (!dest)
+		return (NULL);
+	i = 0;
+	while (s[i] && i < end)
+	{
+		dest[i] = s[i];
+		i++;
+	}
+	dest[i] = '\0';
+	return (dest);
+}
+
+char	*ft_strjoin_and_free(char *s1, char *s2)
+{
+	char	*str;
+
+	if (!s1)
+		return (ft_strdup(s2));
+	str = ft_strjoin(s1, s2);
+	free(s1);
+	return (str);
+}

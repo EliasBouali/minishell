@@ -18,6 +18,8 @@ static void	process_line(char *line, t_env *env)
 	t_token		*toks;
 	t_command	*cmds;
 
+  if (is_blank_line(line))
+    return ;
 	toks = convert_line_to_tokens(line);
 	if (!toks)
 	{
@@ -63,10 +65,13 @@ void	prompt_loop(char **envp)
 		line = readline("minishell$ ");
 		if (handle_eof(line))
 			break ;
-		if (line && *line)
-			add_history(line);
-		if (line)
-			process_line(line, env);
+		if (is_blank_line(line))
+		{
+			free(line);
+			continue;
+		}
+		add_history(line);
+		process_line(line, env);
 		free(line);
 	}
 	free_env(&env);

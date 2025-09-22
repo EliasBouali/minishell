@@ -62,11 +62,11 @@ t_token	*convert_line_to_tokens(char *line)
 {
 	int		i;
 	t_token	*tokens;
-	t_token	token_tmp;
 
+	// t_token	token_tmp;
 	i = 0;
 	tokens = NULL;
-	token_tmp.string = NULL;
+	// token_tmp.string = NULL;
 	while (line[i])
 	{
 		skip_white_space(line, &i);

@@ -13,6 +13,29 @@
 #include "../include/minishell.h"
 #include "../include/parse.h"
 
+static int	handle_redirection_token(t_token **token, t_command *cmd)
+{
+	if ((*token)->type == TOKEN_REDIR_IN)
+		return (parse_redir_in(token, cmd));
+	else if ((*token)->type == TOKEN_REDIR_OUT)
+		return (parse_redir_out(token, cmd));
+	else if ((*token)->type == TOKEN_HEREDOC)
+		return (parse_heredoc(token, cmd));
+	else if ((*token)->type == TOKEN_REDIR_APPEND)
+		return (parse_redir_append(token, cmd));
+	return (0);
+}
+
+static int	process_token(t_token **token, t_command *cmd, int *i)
+{
+	if ((*token)->type == TOKEN_WORD)
+		return (parse_word(token, cmd, i));
+	else if ((*token)->type >= TOKEN_REDIR_IN
+		&& (*token)->type <= TOKEN_REDIR_APPEND)
+		return (handle_redirection_token(token, cmd));
+	return (1);
+}
+
 t_command	*parse_single_command(t_token **token)
 {
 	t_command	*new_cmd;
@@ -20,18 +43,15 @@ t_command	*parse_single_command(t_token **token)
 
 	i = 0;
 	new_cmd = init_cmd(nb_args(token));
+	if (!new_cmd)
+		return (NULL);
 	while ((*token) && (*token)->type != TOKEN_PIPE)
 	{
-		if ((*token)->type == TOKEN_WORD)
-			parse_word(token, new_cmd, &i);
-		else if ((*token)->type == TOKEN_REDIR_IN)
-			parse_redir_in(token, new_cmd);
-		else if ((*token)->type == TOKEN_HEREDOC)
-			parse_heredoc(token, new_cmd);
-		else if ((*token)->type == TOKEN_REDIR_OUT)
-			parse_redir_out(token, new_cmd);
-		else if ((*token)->type == TOKEN_REDIR_APPEND)
-			parse_redir_append(token, new_cmd);
+		if (!process_token(token, new_cmd, &i))
+		{
+			free_cmd_list(new_cmd);
+			return (NULL);
+		}
 	}
 	new_cmd->argv[i] = NULL;
 	return (new_cmd);
@@ -58,7 +78,7 @@ t_command	*parsing_cmds(t_token **token)
 	{
 		new_cmd = tokens_to_cmd(token);
 		if (!new_cmd)
-			return (NULL);
+			return (free_cmd_list(cmd_lst), NULL);
 		if (cmd_lst == NULL)
 			cmd_lst = new_cmd;
 		else

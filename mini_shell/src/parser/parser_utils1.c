@@ -32,12 +32,11 @@ int	skip_redirection_token(t_token **token)
 	return (1);
 }
 /*ma fonction qui va remplir les argv de toute ma commande*/
-
 int	add_word_to_argv(t_token **token, t_command *cmd, int *i)
 {
 	if (!token || !(*token) || (*token)->type != TOKEN_WORD || !cmd)
 		return (0);
-	cmd->argv[*i] = safe_ft_strdup((*token)->string, NULL);
+	cmd->argv[*i] = ft_strdup((*token)->string);
 	if (!cmd->argv[*i])
 	{
 		clean_cmd_argv(cmd->argv, *i);

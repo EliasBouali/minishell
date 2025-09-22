@@ -77,12 +77,12 @@ int							skip_redirection_token(t_token **token);
 int							add_word_to_argv(t_token **token, t_command *cmd,
 								int *i);
 /*---------------PARSER_UTILS1.C---------------*/
-void						parse_word(t_token **tokens, t_command *cmd,
+int							parse_word(t_token **tokens, t_command *cmd,
 								int *i);
-void						parse_redir_in(t_token **tokens, t_command *cmd);
-void						parse_heredoc(t_token **tokens, t_command *cmd);
-void						parse_redir_out(t_token **tokens, t_command *cmd);
-void						parse_redir_append(t_token **tokens,
+int							parse_redir_in(t_token **tokens, t_command *cmd);
+int							parse_heredoc(t_token **tokens, t_command *cmd);
+int							parse_redir_out(t_token **tokens, t_command *cmd);
+int							parse_redir_append(t_token **tokens,
 								t_command *cmd);
 /*---------------PARSER.C---------------*/
 t_command					*parse_single_command(t_token **token);

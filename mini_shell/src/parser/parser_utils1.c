@@ -12,6 +12,7 @@
 
 #include "../include/minishell.h"
 #include "../include/parse.h"
+
 /*fonction qui saute la redirection pour prendre
 le nom du fichier qui vient juste apres la redirection.
 ca evite de mettre la redirection dans args*/
@@ -19,7 +20,6 @@ int	skip_redirection_token(t_token **token)
 {
 	if (!token || !*token || !(*token)->next)
 		return (0);
-
 	if (!is_redirection(*token))
 		return (0);
 	*token = (*token)->next;
@@ -32,6 +32,7 @@ int	skip_redirection_token(t_token **token)
 	return (1);
 }
 /*ma fonction qui va remplir les argv de toute ma commande*/
+
 int	add_word_to_argv(t_token **token, t_command *cmd, int *i)
 {
 	if (!token || !(*token) || (*token)->type != TOKEN_WORD || !cmd)

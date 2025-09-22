@@ -79,9 +79,9 @@ void	handle_command(t_command *cmd, t_env *env)
 	char	*path;
 	int		path_owned;
 
-	if (!cmd || !cmd->args || !cmd->args[0])
+	if (!cmd || !cmd->ARGS || !cmd->ARGS[0])
 		return ;
-	name = cmd->args[0];
+	name = cmd->ARGS[0];
 	if (cmd_is_builtin(name))
 	{
 		g_exit_code = run_builtin_in_parent(cmd, &env);

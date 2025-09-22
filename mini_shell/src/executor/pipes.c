@@ -38,15 +38,15 @@ static void	child_exec(int idx, t_command *cmd, t_pipeline_ctx *cx)
 	name = NULL;
 	path = NULL;
 	own = 0;
-	if (cmd && cmd->args)
-		name = cmd->args[0];
+	if (cmd && cmd->ARGS)
+		name = cmd->ARGS[0];
 	if (!name || !*name)
 		exit(0);
 	if (cmd_is_builtin(name))
-		exit(exec_builtin(cmd->args, &cx->env));
+		exit(exec_builtin(cmd->ARGS, &cx->env));
 	if (resolve_command(name, cx->env, &path, &own) != 0)
 		exit(g_exit_code);
-	exec_external_child(path, cmd->args, cx->env, own);
+	exec_external_child(path, cmd->ARGS, cx->env, own);
 }
 
 static int	launch_children(t_pipeline_ctx *cx, pid_t *pids)

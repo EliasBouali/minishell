@@ -14,4 +14,3 @@
 # define MINISHELL_PARSING_H
 # include "parse.h"
 #endif
-

@@ -81,3 +81,16 @@ char	*ft_strjoin_and_free(char *s1, char *s2)
 	free(s1);
 	return (str);
 }
+
+char	**alloc_envp(size_t n)
+{
+	char	**arr;
+
+	arr = (char **)malloc(sizeof(char *) * (n + 1));
+	if (!arr)
+	{
+		ft_putstr_fd("minishell: env alloc error\n", 2);
+		return (NULL);
+	}
+	return (arr);
+}

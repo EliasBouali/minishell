@@ -12,10 +12,11 @@
 
 #include "../include/minishell.h"
 #include "../include/parse.h"
+
 /*fonction pour verifier que les single
 quotes sont bien fermé dans la ligne de
 commande*/
-static int	is_closed_S_quote(char *line)
+static int	is_closed_s_quote(char *line)
 {
 	int	i;
 	int	count;
@@ -34,10 +35,11 @@ static int	is_closed_S_quote(char *line)
 		return (0);
 	return (1);
 }
+
 /*fonction pour verifier que les double
 quotes sont bien fermé dans la ligne de
 commande*/
-static int	is_closed_D_quote(char *line)
+static int	is_closed_d_quote(char *line)
 {
 	int	i;
 	int	count;
@@ -56,6 +58,7 @@ static int	is_closed_D_quote(char *line)
 		return (0);
 	return (1);
 }
+
 /*fonction pour afficher un message d'erreur
 en cas de probleme de syntaxe pour indiquer
 quel est le probleme detecter*/
@@ -64,20 +67,21 @@ static int	error_line(char *message)
 	ft_putendl_fd(message, 2);
 	return (0);
 }
+
 /*foction final pour verifier chaques problemes
 de syntaxte possible dans la ligne de commande.
 Elles fait appel a toutes les autres fonction.*/
 int	is_valid_line(char *line, t_token *tokens)
 {
-	if (!is_closed_S_quote(line))
-		return error_line("Syntax error : unclosed single quotes!");
-	if (!is_closed_D_quote(line))
-		return error_line("Syntax error : unclosed double quotes!");
+	if (!is_closed_s_quote(line))
+		return (error_line("Syntax error : unclosed single quotes!"));
+	if (!is_closed_d_quote(line))
+		return (error_line("Syntax error : unclosed double quotes!"));
 	if (!is_valid_redirection(tokens))
-		return error_line("Syntax error : invalid redirection!");
+		return (error_line("Syntax error : invalid redirection!"));
 	if (!consecutive_pipes(tokens))
-		return error_line("Syntax error : consecutive pipes!");
+		return (error_line("Syntax error : consecutive pipes!"));
 	if (!valid_pipe_position(tokens))
-		return error_line("Syntax error : invalid pipe position!");
+		return (error_line("Syntax error : invalid pipe position!"));
 	return (1);
 }

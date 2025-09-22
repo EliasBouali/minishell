@@ -16,7 +16,7 @@
 /*fonction pour checker les operateurs ensuite les extraire
 et les rajouter dans un structure token tout en signalant
 via un boolean que c'est bien un operateur*/
-static int handle_input_redir(char *line, t_token *token, int *i)
+static int	handle_input_redir(char *line, t_token *token, int *i)
 {
 	if (!line || !line[*i])
 		return (0);
@@ -36,6 +36,7 @@ static int handle_input_redir(char *line, t_token *token, int *i)
 	}
 	return (0);
 }
+
 static int	handle_output_redir(char *line, t_token *token, int *i)
 {
 	if (!line || !line[*i])
@@ -56,6 +57,7 @@ static int	handle_output_redir(char *line, t_token *token, int *i)
 	}
 	return (0);
 }
+
 static int	handle_pipe(char *line, t_token *token, int *i)
 {
 	if (!line || !line[*i])

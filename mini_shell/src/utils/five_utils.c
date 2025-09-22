@@ -1,24 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   five_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/03 19:44:25 by ebouali           #+#    #+#             */
-/*   Updated: 2025/09/03 19:44:26 by ebouali          ###   ########.fr       */
+/*   Created: 2025/09/22 15:14:31 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/22 15:14:33 by ebouali          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-int	main(int argc, char **argv, char **envp)
+char	*ft_itoa(int n)
 {
-	extern int	rl_catch_signals;
+	int		size;
+	long	nb;
+	char	*str;
 
-	(void)argc;
-	(void)argv;
-	rl_catch_signals = 0;
-	prompt_loop(envp);
-	return (g_exit_code);
+	nb = (long)n;
+	size = num_count(n);
+	str = malloc((size + 1) * sizeof(char));
+	if (!str)
+		return (NULL);
+	str[size] = '\0';
+	if (nb < 0)
+	{
+		str[0] = '-';
+		nb = -nb;
+	}
+	if (nb == 0)
+		str[0] = '0';
+	else
+		itoa_fill(str, nb, size - 1);
+	return (str);
 }

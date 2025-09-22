@@ -12,73 +12,79 @@
 
 #include "../include/minishell.h"
 
-static size_t  env_count_with_value(t_env *env)
+static size_t	env_count_with_value(t_env *env)
 {
-    size_t n = 0;
-    while (env)
-    {
-        if (env->value != NULL)
-            n++;
-        env = env->next;
-    }
-    return n;
+	size_t	n;
+
+	n = 0;
+	while (env)
+	{
+		if (env->value != NULL)
+			n++;
+		env = env->next;
+	}
+	return (n);
 }
 
-/* Join name + '=' + value safely into a newly malloc'ed C-string */
-static char    *join_kv(const char *name, const char *value)
+static char	*make_env_entry(const char *name, const char *value)
 {
-    size_t ln, lv;
-    char   *s;
+	char	*s;
+	size_t	ln;
+	size_t	lv;
 
-    if (!name || !value)
-        return NULL;
-    ln = ft_strlen(name);
-    lv = ft_strlen(value);
-    s = (char *)malloc(ln + 1 /* '=' */ + lv + 1 /* '\0' */);
-    if (!s)
-        return NULL;
-    ft_memcpy(s, name, ln);
-    s[ln] = '=';
-    ft_memcpy(s + ln + 1, value, lv);
-    s[ln + 1 + lv] = '\0';
-    return s;
-}
-/*
-static void    free_envp_array(char **arr)
-{
-    size_t i = 0;
-
-    if (!arr)
-        return;
-    while (arr[i])
-        free(arr[i++]);
-    free(arr);
-}
-	*/
-char    **env_to_envp(t_env *env)
-{
-    size_t  n = env_count_with_value(env), i = 0;
-    char  **arr = (char **)malloc(sizeof(char *) * (n + 1));
-
-    if (!arr)
-        return (ft_putstr_fd("minishell: env alloc error\n", 2), NULL);
-    while (env)
-    {
-        if (env->value)
-        {
-            arr[i] = join_kv(env->name, env->value);
-            if (!arr[i])
-            {
-                while (i) free(arr[--i]);
-                free(arr);
-                ft_putstr_fd("minishell: env alloc error\n", 2);
-                return (NULL);
-            }
-            i++;
-        }
-        env = env->next;
-    }
-    arr[i] = NULL;
-    return (arr);
+	if (!name || !value)
+		return (NULL);
+	ln = ft_strlen(name);
+	lv = ft_strlen(value);
+	s = (char *)malloc(ln + 1 + lv + 1);
+	if (!s)
+		return (NULL);
+	ft_memcpy(s, name, ln);
+	s[ln] = '=';
+	ft_memcpy(s + ln + 1, value, lv);
+	s[ln + 1 + lv] = '\0';
+	return (s);
 }
 
+static void	free_envp_partial(char **arr, size_t count)
+{
+	while (count > 0)
+	{
+		count--;
+		free(arr[count]);
+	}
+	free(arr);
+}
+
+static char	**fail_env_alloc(char **arr, size_t filled)
+{
+	free_envp_partial(arr, filled);
+	ft_putstr_fd("minishell: env alloc error\n", 2);
+	return (NULL);
+}
+
+char	**env_to_envp(t_env *env)
+{
+	size_t	n;
+	size_t	i;
+	char	**arr;
+
+	n = env_count_with_value(env);
+	i = 0;
+	arr = alloc_envp(n);
+	if (!arr)
+		return (NULL);
+	while (env)
+	{
+		if (env->value)
+		{
+			arr[i] = make_env_entry(env->name, env->value);
+			if (!arr[i])
+				return (fail_env_alloc(arr, i));
+			i++;
+		}
+		env = env->next;
+	}
+	arr[i] = NULL;
+	return (arr);
+}

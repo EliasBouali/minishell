@@ -35,7 +35,7 @@ int	run_builtin_in_parent(t_command *cmd, t_env **env)
 		restore_fds(save_in, save_out);
 		return (g_exit_code);
 	}
-	status = exec_builtin(cmd->args, env);
+	status = exec_builtin(cmd->ARGS, env);
 	restore_fds(save_in, save_out);
 	return (status);
 }
@@ -62,12 +62,13 @@ void	child_exec_sequence(t_command *cmd, t_env *env, char *path,
 		else
 			exit(1);
 	}
-	execve(path, cmd->args, env_to_envp(env));
+	execve(path, cmd->ARGS, env_to_envp(env));
 	perror("minishell");
 	if (path_owned)
 		free(path);
 	exit(126);
 }
+
 int	check_slash_cmd_fs(const char *name)
 {
 	struct stat	st;
@@ -92,4 +93,3 @@ int	check_slash_cmd_fs(const char *name)
 	}
 	return (0);
 }
-

@@ -12,12 +12,13 @@
 
 #include "../include/minishell.h"
 #include "../include/parse.h"
+
 /*fonction pour compter les nombre de tokens
 de type word qui seront ajouter dans les args
 de ma commande*/
 int	nb_args(t_token **token)
 {
-	int	count;
+	int		count;
 	t_token	*tmp;
 
 	count = 0;
@@ -30,6 +31,7 @@ int	nb_args(t_token **token)
 	}
 	return (count);
 }
+
 /*fonction pour allouer et initialiser ma commande
 avec la bonne taille pour les arguments et mettre
 tous les points de la struct commande a NULL ou
@@ -54,6 +56,7 @@ t_command	*init_cmd(int word_count)
 	new_cmd->outfile = NULL;
 	return (new_cmd);
 }
+
 /*ma fonction ft_strdup qui libere la liste
 de commande en cas d'erreur de malloc.*/
 char	*safe_ft_strdup(char *s, t_command **cmd_lst)
@@ -74,6 +77,7 @@ char	*safe_ft_strdup(char *s, t_command **cmd_lst)
 	}
 	return (dup);
 }
+
 /*fonction qui liberer mes args dans ma commande
 en cas d'erreur en plein remplissage*/
 void	clean_cmd_argv(char **argv, int count)
@@ -90,6 +94,7 @@ void	clean_cmd_argv(char **argv, int count)
 	}
 	free(argv);
 }
+
 /*fonction qui verifie si mon token dans
 ma ligne de commande est une redirection.*/
 int	is_redirection(t_token *token)

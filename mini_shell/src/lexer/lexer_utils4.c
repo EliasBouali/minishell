@@ -21,6 +21,7 @@ int	var_start_ok(char c)
 		return (0);
 	return (1);
 }
+
 /*fonction pour les cas speciaux apres le signe dollar*/
 int	check_special_dollar_case(char *str, int i)
 {
@@ -31,10 +32,12 @@ int	check_special_dollar_case(char *str, int i)
 	next = str[i + 1];
 	if (next == '\0')
 		return (1);
-	if (next == '$' || next == '"' || next == '=' || next == '\\' || ft_isdigit(next))
+	if (next == '$' || next == '"' || next == '=' || next == '\\'
+		|| ft_isdigit(next))
 		return (1);
 	return (0);
 }
+
 /*fonction pour sortir le nom de la variable d'environement
 dans les doubles quotes*/
 char	*extract_var_name(char *str, int *i)
@@ -65,12 +68,14 @@ char	*extract_var_name(char *str, int *i)
 		return (NULL);
 	return (var_str);
 }
+
 /*fonction pour sortir la valeur de la variable d'environement
 ou son chemin
 exemple '$USER = nom_de_hote'*/
 char	*get_var_value(char *name)
 {
 	char	*var_name;
+
 	if (!name)
 		return (NULL);
 	if (ft_strncmp(name, "?", 1) == 0)
@@ -80,6 +85,7 @@ char	*get_var_value(char *name)
 		return (ft_strdup(""));
 	return (var_name);
 }
+
 /*fonction pour trouver la taille de la value de notre variable
 d'environement*/
 int	get_var_len(char *str, int *i)

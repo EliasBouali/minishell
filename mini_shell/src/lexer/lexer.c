@@ -34,6 +34,7 @@ static int	handle_operator_token(char *line, int *i, t_token **tokens)
 	free(token_tmp.string);
 	return (1);
 }
+
 static int	handle_word_token(char *line, int *i, t_token **tokens)
 {
 	char	*word;
@@ -58,15 +59,16 @@ static int	handle_word_token(char *line, int *i, t_token **tokens)
 sauter les espaces blanc, trouver quels type de mots on a
 l'ajouter dans la liste chainé avec son mots et son type
 et continuer jusqu'a la fin de la ligne de commande*/
+// t_token	token_tmp;
+// token_tmp.string = NULL;
+
 t_token	*convert_line_to_tokens(char *line)
 {
 	int		i;
 	t_token	*tokens;
 
-	// t_token	token_tmp;
 	i = 0;
 	tokens = NULL;
-	// token_tmp.string = NULL;
 	while (line[i])
 	{
 		skip_white_space(line, &i);

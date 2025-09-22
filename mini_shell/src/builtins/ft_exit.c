@@ -32,31 +32,31 @@ static int	is_numeric(const char *s)
 	return (1);
 }
 
-int ft_exit(char **argv, t_env **env)
+int	ft_exit(char **argv, t_env **env)
 {
-    long long val;
-    (void)env;
+	long long	val;
 
-    if (!argv[1])
-    {
-        ft_putendl_fd("exit", 1);
-        exit(g_exit_code);
-    }
-    if (!is_numeric(argv[1]))
-    {
-        ft_putendl_fd("exit", 1);
-        ft_putstr_fd("minishell: exit: ", 2);
-        ft_putstr_fd(argv[1], 2);
-        ft_putendl_fd(": numeric argument required", 2);
-        exit(2);
-    }
-    if (argv[2])
-    {
-        ft_putendl_fd("minishell: exit: too many arguments", 2);
-        g_exit_code = 1;
-        return 1;
-    }
-    val = ft_atoll(argv[1]);
-    ft_putendl_fd("exit", 1);
-    exit((unsigned char)val);
+	(void)env;
+	if (!argv[1])
+	{
+		ft_putendl_fd("exit", 1);
+		exit(g_exit_code);
+	}
+	if (!is_numeric(argv[1]))
+	{
+		ft_putendl_fd("exit", 1);
+		ft_putstr_fd("minishell: exit: ", 2);
+		ft_putstr_fd(argv[1], 2);
+		ft_putendl_fd(": numeric argument required", 2);
+		exit(2);
+	}
+	if (argv[2])
+	{
+		ft_putendl_fd("minishell: exit: too many arguments", 2);
+		g_exit_code = 1;
+		return (1);
+	}
+	val = ft_atoll(argv[1]);
+	ft_putendl_fd("exit", 1);
+	exit((unsigned char)val);
 }

@@ -91,19 +91,3 @@ char	*get_path_to_cmd(char *cmd, const char *path_var)
 	free_split(dirs);
 	return (NULL);
 }
-
-int	save_fds(int *in, int *out)
-{
-	*in = dup(STDIN_FILENO);
-	*out = dup(STDOUT_FILENO);
-	if (*in == -1 || *out == -1)
-	{
-		perror("minishell: dup");
-		if (*in != -1)
-			close(*in);
-		if (*out != -1)
-			close(*out);
-		return (-1);
-	}
-	return (0);
-}

@@ -12,11 +12,12 @@
 
 #include "../include/minishell.h"
 #include "../include/parse.h"
+
 /*fonction pour liberer la memoire de toutes les cmd
 de la ligne*/
 void	free_cmd_list(t_command *cmd)
 {
-	int	i;
+	int			i;
 	t_command	*tmp;
 
 	if (!cmd)
@@ -42,12 +43,13 @@ void	free_cmd_list(t_command *cmd)
 		cmd = tmp;
 	}
 }
+
 /*Fonction pour clalculer la nouvelle taille total
 avec la valeur de chaques variables d'environement*/
 int	calculate_total_size(char *str)
 {
-	int		total;
-	int		i;
+	int	total;
+	int	i;
 
 	if (!str)
 		return (0);
@@ -65,6 +67,7 @@ int	calculate_total_size(char *str)
 	}
 	return (total + 1);
 }
+
 /*fonction pour ajouter la valeur de la variable
 d'environement dans la ligne de commande*/
 void	add_var_value(char *str, char *result, int *i, int *j)
@@ -86,6 +89,7 @@ void	add_var_value(char *str, char *result, int *i, int *j)
 	free(var_name);
 	free(var_value);
 }
+
 /*fonction pour trouver les valeurs de variables d'environement
 si elles sont dans les doubles quotes
 les remplacer ensuite dans la ligne de commande
@@ -107,7 +111,8 @@ char	*expand_variables(char *str)
 	{
 		if (str[i] == '$' && check_special_dollar_case(str, i))
 			result[j++] = str[i++];
-		else if (str[i] == '$' && (var_start_ok(str[i + 1]) || str[i + 1] == '?'))
+		else if (str[i] == '$' && (var_start_ok(str[i + 1]) || str[i
+					+ 1] == '?'))
 			add_var_value(str, result, &i, &j);
 		else
 			result[j++] = str[i++];

@@ -12,6 +12,7 @@
 
 #include "../include/minishell.h"
 #include "../include/parse.h"
+
 /*fonction pour verifier si c'est un espace blanc*/
 int	is_white_space(char c)
 {
@@ -19,6 +20,7 @@ int	is_white_space(char c)
 		return (1);
 	return (0);
 }
+
 /*fonction pour verifier si on a un operateur*/
 int	is_operator(char c)
 {
@@ -26,6 +28,7 @@ int	is_operator(char c)
 		return (1);
 	return (0);
 }
+
 /*fonction pour verifier les double et single quote*/
 int	is_quoted(char c)
 {
@@ -33,6 +36,7 @@ int	is_quoted(char c)
 		return (1);
 	return (0);
 }
+
 /*fonction qui saute les espaces blancs*/
 void	skip_white_space(char *line, int *i)
 {

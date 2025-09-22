@@ -16,7 +16,7 @@
 static const char	*get_type_char(int type)
 {
 	if (type == TOKEN_WORD)
-		return("WORD");
+		return ("WORD");
 	else if (type == TOKEN_REDIR_IN)
 		return ("REDIR_IN");
 	else if (type == TOKEN_REDIR_OUT)
@@ -40,26 +40,37 @@ void	print_tokens(t_token *head)
 	}
 }
 
+static void	print_str_field(const char *label, const char *val)
+{
+	if (val)
+		printf("%-12s =      [%s]\n", label, val);
+	else
+		printf("%-12s =      [NULL]\n", label);
+}
+
 void	print_cmd(t_command *cmd)
 {
 	int	i;
 
-	i = 0;
 	if (!cmd)
 	{
 		printf("Commande vide.\n");
-		return;
+		return ;
 	}
 	printf("cmd :\n");
-	while (cmd->argv[i])
+	if (cmd->argv)
 	{
-		printf("args = [%s]\n", cmd->argv[i]);
-		i++;
+		i = 0;
+		while (cmd->argv[i])
+		{
+			printf("args = [%s]\n", cmd->argv[i]);
+			i++;
+		}
 	}
-	printf("infile      =      [%s]\n", cmd->infile ? cmd->infile : "NULL");
-	printf("outfile      =      [%s]\n", cmd->outfile ? cmd->outfile : "NULL");
+	print_str_field("infile", cmd->infile);
+	print_str_field("outfile", cmd->outfile);
 	printf("append      =      [%d]\n", cmd->append);
-	printf("heredoc      =      [%d]\n", cmd->heredoc);
+	printf("heredoc     =      [%d]\n", cmd->heredoc);
 }
 
 void	print_all_cmds(t_command *cmd_list)

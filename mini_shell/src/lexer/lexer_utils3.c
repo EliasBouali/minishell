@@ -13,28 +13,29 @@
 #include "../include/minishell.h"
 #include "../include/parse.h"
 
-static int	append_S_quoted(char *line, int *i, char **final_word)
+static int	append_s_quoted(char *line, int *i, char **final_word)
 {
 	char	*word;
 
-	word = extract_S_quoted(line, i);
+	word = extract_s_quoted(line, i);
 	if (!word)
-		{
-			free(*final_word);
-			return (0);
-		}
+	{
+		free(*final_word);
+		return (0);
+	}
 	*final_word = ft_strjoin_and_free(*final_word, word);
 	free(word);
 	if (!*final_word)
 		return (0);
 	return (1);
 }
-static int	append_D_quoted(char *line, int *i, char **final_word)
+
+static int	append_d_quoted(char *line, int *i, char **final_word)
 {
 	char	*word;
 	char	*temp;
 
-	temp = extract_D_quoted(line, i);
+	temp = extract_d_quoted(line, i);
 	if (!temp)
 	{
 		free(*final_word);
@@ -53,6 +54,7 @@ static int	append_D_quoted(char *line, int *i, char **final_word)
 		return (0);
 	return (1);
 }
+
 static int	append_unquoted(char *line, int *i, char **final_word)
 {
 	char	*word;
@@ -87,21 +89,20 @@ char	*collect_word(char *line, int *i)
 	char	*final_word;
 
 	final_word = NULL;
-	if (!line || !line[*i] || is_white_space(line[*i])
-		|| is_operator(line[*i]))
+	if (!line || !line[*i] || is_white_space(line[*i]) || is_operator(line[*i]))
 		return (NULL);
 	while (line[*i])
 	{
 		if (!line[*i] || is_white_space(line[*i]) || is_operator(line[*i]))
-			break;
+			break ;
 		if (line[*i] == '\'')
 		{
-			if (!append_S_quoted(line, i, &final_word))
+			if (!append_s_quoted(line, i, &final_word))
 				return (NULL);
 		}
 		else if (line[*i] == '"')
 		{
-			if (!append_D_quoted(line, i, &final_word))
+			if (!append_d_quoted(line, i, &final_word))
 				return (NULL);
 		}
 		else

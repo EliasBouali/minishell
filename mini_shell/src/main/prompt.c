@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   prompt.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/22 14:59:41 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/22 14:59:44 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static void	exec_cmds(t_command *cmds, t_env *env)
@@ -18,8 +30,8 @@ static void	process_line(char *line, t_env *env)
 	t_token		*toks;
 	t_command	*cmds;
 
-  if (is_blank_line(line))
-    return ;
+	if (is_blank_line(line))
+		return ;
 	toks = convert_line_to_tokens(line);
 	if (!toks)
 	{
@@ -68,7 +80,7 @@ void	prompt_loop(char **envp)
 		if (is_blank_line(line))
 		{
 			free(line);
-			continue;
+			continue ;
 		}
 		add_history(line);
 		process_line(line, env);

@@ -1,5 +1,16 @@
-#include "../include/minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec_third_utils.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ebouali <ebouali@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/22 15:13:26 by ebouali           #+#    #+#             */
+/*   Updated: 2025/09/22 15:13:28 by ebouali          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "../include/minishell.h"
 
 char	*cmd_not_found(char *name)
 {
@@ -41,4 +52,20 @@ char	*path_from_dirs(const char *name, char **dirs, int *owned)
 	}
 	free_split(dirs);
 	return (NULL);
+}
+
+int	save_fds(int *in, int *out)
+{
+	*in = dup(STDIN_FILENO);
+	*out = dup(STDOUT_FILENO);
+	if (*in == -1 || *out == -1)
+	{
+		perror("minishell: dup");
+		if (*in != -1)
+			close(*in);
+		if (*out != -1)
+			close(*out);
+		return (-1);
+	}
+	return (0);
 }

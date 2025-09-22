@@ -39,6 +39,7 @@ void	parse_redir_out(t_token **token, t_command *cmd)
 	cmd->append = 0;
 	*token = (*token)->next->next;
 }
+
 void	parse_redir_append(t_token **token, t_command *cmd)
 {
 	cmd->outfile = ft_strdup((*token)->next->string);

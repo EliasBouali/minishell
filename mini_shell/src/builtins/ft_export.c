@@ -12,7 +12,6 @@
 
 #include "../../include/minishell.h"
 
-
 static int	print_env_simple(t_env *env)
 {
 	t_env	*cur;
@@ -62,40 +61,45 @@ static int	split_name_and_value(const char *arg, char **out_name,
 	return (1);
 }
 
-static int	export_one_var(const char *arg, t_env **env)
+static int	export_error(int kind, const char *arg)
 {
-	char *name, *value;
-	int has_equal, ret;
-	if (!split_name_and_value(arg, &name, &value))
-		return (ft_putendl_fd("minishell: export: alloc error", 2), 1);
-	if (!is_valid_name(name))
+	if (kind == 0)
 	{
-		ft_putstr_fd("minishell: export: `", 2);
-		ft_putstr_fd((char *)arg, 2);
-		ft_putendl_fd("': not a valid identifier", 2);
-		free(name);
-		free(value);
+		ft_putendl_fd("minishell: export: alloc error", 2);
 		return (1);
 	}
+	ft_putstr_fd("minishell: export: `", 2);
+	ft_putstr_fd((char *)arg, 2);
+	ft_putendl_fd("': not a valid identifier", 2);
+	return (1);
+}
+
+static int	export_one_var(const char *arg, t_env **env)
+{
+	char	*name;
+	char	*value;
+	int		has_equal;
+	int		ret;
+
+	if (!split_name_and_value(arg, &name, &value))
+		return (export_error(0, NULL));
+	if (!is_valid_name(name))
+		return (free(name), free(value), export_error(1, arg));
 	has_equal = (ft_strchr(arg, '=') != NULL);
 	if (!has_equal && env_get(*env, name))
-	{
-		free(name);
-		free(value);
-		return (0);
-	}
+		return (free(name), free(value), 0);
 	ret = env_set(env, name, value);
 	free(name);
 	free(value);
 	if (ret == 2)
-		return (ft_putendl_fd("minishell: export: alloc error", 2), 1);
+		return (export_error(0, NULL));
 	return (0);
 }
 
 int	ft_export(char **argv, t_env **env)
 {
-	int i;
-	int exit_code;
+	int	i;
+	int	exit_code;
 
 	if (!env)
 		return (1);

@@ -18,7 +18,7 @@ de type word qui seront ajouter dans les args
 de ma commande*/
 int	nb_args(t_token **token)
 {
-	int		count;
+	int	count;
 	t_token	*tmp;
 
 	count = 0;
@@ -53,6 +53,7 @@ t_command	*init_cmd(int word_count)
 	new_cmd->next = NULL;
 	new_cmd->infile = NULL;
 	new_cmd->outfile = NULL;
+  new_cmd->redir = NULL;
 	return (new_cmd);
 }
 /*ma fonction ft_strdup qui libere la liste

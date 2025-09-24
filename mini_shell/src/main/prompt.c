@@ -10,7 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../include/minishell.h"
+#include "../include/parse.h"
 
 static void	exec_cmds(t_command *cmds, t_env *env)
 {
@@ -32,7 +33,7 @@ static void	process_line(char *line, t_env *env)
 
 	if (is_blank_line(line))
 		return ;
-	toks = convert_line_to_tokens(line);
+	toks = convert_line_to_tokens(line, env);
 	if (!toks)
 	{
 		ft_putendl_fd("Lexing failed: invalid input", 2);

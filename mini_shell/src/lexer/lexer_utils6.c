@@ -22,11 +22,15 @@ t_token	*new_token(char *string, int type)
 	if (!new_token)
 		return (NULL);
 	new_token->string = ft_strdup(string);
+	if (!new_token->string)
+	{
+		free(new_token);
+		return (NULL);
+	}
 	new_token->type = type;
 	new_token->next = NULL;
 	return (new_token);
 }
-
 /*fonction qui ajoute un token a la liste chainé*/
 void	add_token(t_token **head, t_token *new_token)
 {
@@ -42,7 +46,6 @@ void	add_token(t_token **head, t_token *new_token)
 		last = last->next;
 	last->next = new_token;
 }
-
 /*fonction qui libere ma liste chainé*/
 void	free_token(t_token *head)
 {
@@ -58,7 +61,6 @@ void	free_token(t_token *head)
 		head = tmp;
 	}
 }
-
 /*fonction combine la creation du token et l'ajout a la liste chainé*/
 int	emit_token(t_token **head, char *str, int type)
 {

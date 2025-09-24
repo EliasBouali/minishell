@@ -20,6 +20,7 @@ int	skip_redirection_token(t_token **token)
 {
 	if (!token || !*token || !(*token)->next)
 		return (0);
+
 	if (!is_redirection(*token))
 		return (0);
 	*token = (*token)->next;

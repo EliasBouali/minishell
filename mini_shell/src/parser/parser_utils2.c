@@ -53,7 +53,7 @@ int	parse_redir_out(t_token **token, t_command *cmd)
 		free(cmd->outfile);
 	cmd->outfile = ft_strdup((*token)->next->string);
 	if (!cmd->outfile)
-		return (0);
+		return(0);
 	cmd->append = 0;
 	*token = (*token)->next->next;
 	return (1);
@@ -64,7 +64,7 @@ int	parse_redir_append(t_token **token, t_command *cmd)
 		free(cmd->outfile);
 	cmd->outfile = ft_strdup((*token)->next->string);
 	if (!cmd->outfile)
-		return (0);
+		return(0);
 	cmd->append = 1;
 	*token = (*token)->next->next;
 	return (1);

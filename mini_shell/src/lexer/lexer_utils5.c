@@ -17,7 +17,7 @@
 de la ligne*/
 void	free_cmd_list(t_command *cmd)
 {
-	int			i;
+	int	i;
 	t_command	*tmp;
 
 	if (!cmd)
@@ -43,13 +43,12 @@ void	free_cmd_list(t_command *cmd)
 		cmd = tmp;
 	}
 }
-
 /*Fonction pour clalculer la nouvelle taille total
 avec la valeur de chaques variables d'environement*/
-int	calculate_total_size(char *str)
+int	calculate_total_size(char *str, t_env *env)
 {
-	int	total;
-	int	i;
+	int		total;
+	int		i;
 
 	if (!str)
 		return (0);
@@ -58,7 +57,7 @@ int	calculate_total_size(char *str)
 	while (str[i])
 	{
 		if (str[i] == '$' && (var_start_ok(str[i + 1]) || str[i + 1] == '?'))
-			total += get_var_len(str, &i);
+			total += get_var_len(str, &i, env);
 		else
 		{
 			total++;
@@ -67,56 +66,62 @@ int	calculate_total_size(char *str)
 	}
 	return (total + 1);
 }
-
 /*fonction pour ajouter la valeur de la variable
 d'environement dans la ligne de commande*/
-void	add_var_value(char *str, char *result, int *i, int *j)
+int add_var_value(char *str, char *result, int *i, t_env *env)
 {
-	char	*var_name;
-	char	*var_value;
-	int		k;
+    char *var_name;
+    char *var_value;
+    int   k;
+    int   written;
 
-	var_name = extract_var_name(str, i);
-	if (!var_name)
-		return ;
-	var_value = get_var_value(var_name);
-	if (var_value)
-	{
-		k = 0;
-		while (var_value[k])
-			result[(*j)++] = var_value[k++];
-	}
-	free(var_name);
-	free(var_value);
+    var_name = extract_var_name(str, i);
+    if (!var_name)
+        return (0);
+    var_value = get_var_value(var_name, env);
+    written = 0;
+    if (var_value)
+    {
+        k = 0;
+        while (var_value[k])
+        {
+            result[written] = var_value[k];
+            written++;
+            k++;
+        }
+    }
+    free(var_name);
+    free(var_value);
+    return (written);
 }
 
 /*fonction pour trouver les valeurs de variables d'environement
 si elles sont dans les doubles quotes
 les remplacer ensuite dans la ligne de commande
 par leur valeur*/
-char	*expand_variables(char *str)
+char    *expand_variables(char *str, t_env *env)
 {
-	char	*result;
-	int		i;
-	int		j;
+    char    *result;
+    int     i;
+    int     j;
 
-	if (!str)
-		return (NULL);
-	i = 0;
-	j = 0;
-	result = malloc((calculate_total_size(str)) * sizeof(char));
-	if (!result)
-		return (NULL);
-	while (str[i])
-	{
-		if (str[i] == '$' && check_special_dollar_case(str, i))
-			result[j++] = str[i++];
-		else if (str[i] == '$' && (var_start_ok(str[i + 1]) || str[i
-					+ 1] == '?'))
-			add_var_value(str, result, &i, &j);
-		else
-			result[j++] = str[i++];
-	}
-	result[j] = '\0';
-	return (result);
+    if (!str)
+        return (NULL);
+    i = 0;
+    j = 0;
+    result = malloc(calculate_total_size(str, env) * sizeof(char));
+    if (!result)
+        return (NULL);
+
+    while (str[i])
+    {
+        if (str[i] == '$' && check_special_dollar_case(str, i))
+            result[j++] = str[i++];
+        else if (str[i] == '$' && (var_start_ok(str[i + 1]) || str[i + 1] == '?'))
+            j += add_var_value(str, result + j, &i, env);
+        else
+            result[j++] = str[i++];
+    }
+    result[j] = '\0';
+    return (result);
 }

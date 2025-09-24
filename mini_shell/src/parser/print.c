@@ -16,7 +16,7 @@
 static const char	*get_type_char(int type)
 {
 	if (type == TOKEN_WORD)
-		return ("WORD");
+		return("WORD");
 	else if (type == TOKEN_REDIR_IN)
 		return ("REDIR_IN");
 	else if (type == TOKEN_REDIR_OUT)
@@ -48,7 +48,7 @@ void	print_cmd(t_command *cmd)
 	if (!cmd)
 	{
 		printf("Commande vide.\n");
-		return ;
+		return;
 	}
 	printf("cmd :\n");
 	while (cmd->argv[i])

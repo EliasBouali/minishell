@@ -31,8 +31,8 @@ static int	process_token(t_token **token, t_command *cmd, int *i)
 	if ((*token)->type == TOKEN_WORD)
 		return (parse_word(token, cmd, i));
 	else if ((*token)->type >= TOKEN_REDIR_IN
-		&& (*token)->type <= TOKEN_REDIR_APPEND)
-		return (handle_redirection_token(token, cmd));
+	&& (*token)->type <= TOKEN_REDIR_APPEND)
+		return(handle_redirection_token(token, cmd));
 	return (1);
 }
 
@@ -52,6 +52,7 @@ t_command	*parse_single_command(t_token **token)
 			free_cmd_list(new_cmd);
 			return (NULL);
 		}
+
 	}
 	new_cmd->argv[i] = NULL;
 	return (new_cmd);
@@ -78,7 +79,7 @@ t_command	*parsing_cmds(t_token **token)
 	{
 		new_cmd = tokens_to_cmd(token);
 		if (!new_cmd)
-			return (free_cmd_list(cmd_lst), NULL);
+			return (free_cmd_list(cmd_lst) ,NULL);
 		if (cmd_lst == NULL)
 			cmd_lst = new_cmd;
 		else

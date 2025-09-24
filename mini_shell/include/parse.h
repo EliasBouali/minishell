@@ -40,26 +40,25 @@ int							extract_operator(char *line, t_token *token,
 // int			append_s_quoted(char *line, int *i, char **final_word);
 // int			append_d_quoted(char *line, int *i, char **final_word);
 // int			append_unquoted(char *line, int *i, char **final_word);
-char						*collect_word(char *line, int *i);
+char						*collect_word(char *line, int *i, t_env *env);
 /*---------------LEXER_UTILS4.C---------------*/
 int							var_start_ok(char c);
 int							check_special_dollar_case(char *str, int i);
 char						*extract_var_name(char *str, int *i);
-char						*get_var_value(char *name);
-int							get_var_len(char *str, int *i);
+char						*get_var_value(char *name, t_env *env);
+int							get_var_len(char *str, int *i, t_env *env);
 /*---------------LEXER_UTILS5.C---------------*/
 void						free_cmd_list(t_command *cmd);
-int							calculate_total_size(char *str);
-void						add_var_value(char *str, char *result, int *i,
-								int *j);
-char						*expand_variables(char *str);
+int							calculate_total_size(char *str, t_env *env);
+int             add_var_value(char *str, char *result, int *i, t_env *env);
+char						*expand_variables(char *str, t_env *env);
 /*---------------LEXER_UTILS6.C---------------*/
 t_token						*new_token(char *string, int type);
 void						add_token(t_token **head, t_token *new_token);
 void						free_token(t_token *head);
 int							emit_token(t_token **head, char *str, int type);
 /*---------------LEXER.C---------------*/
-t_token						*convert_line_to_tokens(char *line);
+t_token						*convert_line_to_tokens(char *line, t_env *env);
 /*---------------LINE_CHECK1/2.C---------------*/
 int							is_valid_redirection(t_token *tokens);
 int							consecutive_pipes(t_token *tokens);

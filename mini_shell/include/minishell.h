@@ -13,20 +13,24 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-/* ===== INCLUDES (stdio AVANT readline) ===== */
-# include <errno.h>
-# include <fcntl.h>
-# include <limits.h>
-# include <readline/history.h>
-# include <readline/readline.h>
-# include <signal.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <stdbool.h>
+# include <stdint.h>
+# include <limits.h>
+# include <errno.h>
 # include <string.h>
-# include <sys/stat.h>
-# include <sys/types.h>
-# include <sys/wait.h>
+
 # include <unistd.h>
+# include <fcntl.h>
+# include <signal.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <sys/wait.h>
+
+# include <readline/readline.h>
+# include <readline/history.h>
+
 
 typedef struct s_env	t_env;
 
@@ -143,7 +147,6 @@ int						ft_exit(char **argv, t_env **env);
 void					free_cmd_list(t_command *head);
 
 /* ===== LEXER/PARSER/CHECKER (du binôme) ===== */
-t_token					*convert_line_to_tokens(char *line);
 void					free_token(t_token *head);
 int						is_valid_line(char *line, t_token *tokens);
 t_command				*parsing_cmds(t_token **token);

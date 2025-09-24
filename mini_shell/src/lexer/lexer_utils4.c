@@ -21,7 +21,6 @@ int	var_start_ok(char c)
 		return (0);
 	return (1);
 }
-
 /*fonction pour les cas speciaux apres le signe dollar*/
 int	check_special_dollar_case(char *str, int i)
 {
@@ -32,12 +31,10 @@ int	check_special_dollar_case(char *str, int i)
 	next = str[i + 1];
 	if (next == '\0')
 		return (1);
-	if (next == '$' || next == '"' || next == '=' || next == '\\'
-		|| ft_isdigit(next))
+	if (next == '$' || next == '"' || next == '=' || next == '\\' || ft_isdigit(next))
 		return (1);
 	return (0);
 }
-
 /*fonction pour sortir le nom de la variable d'environement
 dans les doubles quotes*/
 char	*extract_var_name(char *str, int *i)
@@ -68,27 +65,27 @@ char	*extract_var_name(char *str, int *i)
 		return (NULL);
 	return (var_str);
 }
-
 /*fonction pour sortir la valeur de la variable d'environement
 ou son chemin
 exemple '$USER = nom_de_hote'*/
-char	*get_var_value(char *name)
+char	*get_var_value(char *name, t_env *env)
 {
-	char	*var_name;
+	char		*var_name;
+	const char	*value;
 
 	if (!name)
 		return (NULL);
 	if (ft_strncmp(name, "?", 1) == 0)
 		return (ft_itoa(g_exit_code));
-	var_name = ft_strdup(getenv(name));
+	value = env_get(env, name);
+	var_name = ft_strdup(value);
 	if (!var_name)
 		return (ft_strdup(""));
 	return (var_name);
 }
-
 /*fonction pour trouver la taille de la value de notre variable
 d'environement*/
-int	get_var_len(char *str, int *i)
+int	get_var_len(char *str, int *i, t_env *env)
 {
 	int		var_len;
 	char	*var_name;
@@ -100,7 +97,7 @@ int	get_var_len(char *str, int *i)
 	var_name = extract_var_name(str, i);
 	if (!var_name)
 		return (0);
-	var_value = get_var_value(var_name);
+	var_value = get_var_value(var_name, env);
 	if (var_value)
 		var_len += ft_strlen(var_value);
 	free(var_value);

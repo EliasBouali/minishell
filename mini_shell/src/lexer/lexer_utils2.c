@@ -13,10 +13,11 @@
 #include "../include/minishell.h"
 #include "../include/parse.h"
 
+
 /*fonction pour checker les operateurs ensuite les extraire
 et les rajouter dans un structure token tout en signalant
 via un boolean que c'est bien un operateur*/
-static int	handle_input_redir(char *line, t_token *token, int *i)
+static int handle_input_redir(char *line, t_token *token, int *i)
 {
 	if (!line || !line[*i])
 		return (0);
@@ -26,17 +27,20 @@ static int	handle_input_redir(char *line, t_token *token, int *i)
 		{
 			token->type = TOKEN_HEREDOC;
 			token->string = ft_strdup("<<");
+			if (!token->string)
+				return (0);
 			*i += 2;
 			return (1);
 		}
 		token->type = TOKEN_REDIR_IN;
 		token->string = ft_strdup("<");
+		if (!token->string)
+			return (0);
 		*i += 1;
 		return (1);
 	}
 	return (0);
 }
-
 static int	handle_output_redir(char *line, t_token *token, int *i)
 {
 	if (!line || !line[*i])
@@ -47,17 +51,20 @@ static int	handle_output_redir(char *line, t_token *token, int *i)
 		{
 			token->type = TOKEN_REDIR_APPEND;
 			token->string = ft_strdup(">>");
+			if (!token->string)
+				return (0);
 			*i += 2;
 			return (1);
 		}
 		token->type = TOKEN_REDIR_OUT;
 		token->string = ft_strdup(">");
+		if (!token->string)
+			return (0);
 		*i += 1;
 		return (1);
 	}
 	return (0);
 }
-
 static int	handle_pipe(char *line, t_token *token, int *i)
 {
 	if (!line || !line[*i])
@@ -66,6 +73,8 @@ static int	handle_pipe(char *line, t_token *token, int *i)
 	{
 		token->type = TOKEN_PIPE;
 		token->string = ft_strdup("|");
+		if (!token->string)
+			return (0);
 		*i += 1;
 		return (1);
 	}

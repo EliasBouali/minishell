@@ -12,6 +12,17 @@
 
 #include "../include/minishell.h"
 #include "../include/parse.h"
+/*
+int	main(int argc, char **argv, char **envp)
+{
+	extern int	rl_catch_signals;
+
+	(void)argc;
+	(void)argv;
+	rl_catch_signals = 0;
+	prompt_loop(envp);
+	return (g_exit_code);
+}*/
 
 int	main(int argc, char **argv, char **envp)
 {

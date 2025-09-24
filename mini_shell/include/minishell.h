@@ -156,7 +156,7 @@ int						normalize_parsed_cmds(t_command *head);
 void					clear_parser_redir_fields(t_command *head);
 
 /* ===== EXECUTEUR (tes fichiers) ===== */
-void					handle_command(t_command *cmd, t_env *env);
+ void					handle_command(t_command *cmd, t_env *env);
 int						execute_pipeline(t_command *head, t_env *env);
 int						apply_redirections(t_command *cmd, t_env **env);
 int						open_heredoc(char const *delim, int *out_fd,

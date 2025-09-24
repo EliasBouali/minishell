@@ -131,14 +131,20 @@ all:
 	  1) \
 	    rm -f "$(PROGRESS_FILE)"; \
 	    printf "\n🛠️  Compilation en cours... ⏳\n\n"; \
-	    $(MAKE) -s --no-print-directory build; \
-	    printf "\n\n✅ Compilation terminée ! 🎉😄\n\n"; \
+	    if $(MAKE) -s --no-print-directory build; then \
+	      printf "\n\n✅ Compilation terminée ! 🎉😄\n\n"; \
+	    else \
+	      printf "\n\n❌ Échec de la compilation. 🔥\n"; \
+	      exit 2; \
+	    fi; \
 	    ;; \
 	  *) \
 	    printf "\n❌ Vérification de dépendances échouée.\n"; \
 	    exit 2; \
 	    ;; \
 	esac
+
+
 
 build: $(NAME)
 

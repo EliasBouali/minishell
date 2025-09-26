@@ -2,16 +2,37 @@
 #        Minishell
 # =======================
 
-SHELL      := /bin/sh
+SHELL := /bin/sh
 .NOTPARALLEL:
 
-NAME       := minishell
-CC         := gcc
-CFLAGS     := -Wall -Wextra -Werror -Iinclude -I/usr/local/opt/readline/include
-LDFLAGS    := -L/usr/local/opt/readline/lib
-LDLIBS     := -lreadline
+NAME    := minishell
+CC      := gcc
+CFLAGS  := -Wall -Wextra -Werror -Iinclude
+LDFLAGS :=
+LDLIBS  :=
 
-# ===== Sources =====
+# --- Détection simple de readline (portable) ---
+UNAME_S := $(shell uname -s)
+RL_PKG_CFLAGS := $(shell pkg-config --cflags readline 2>/dev/null)
+RL_PKG_LIBS   := $(shell pkg-config --libs   readline 2>/dev/null)
+
+# 1) Si pkg-config fonctionne
+ifneq ($(RL_PKG_LIBS),)
+  CFLAGS  += $(RL_PKG_CFLAGS)
+  LDFLAGS += $(filter -L%,$(RL_PKG_LIBS))
+  LDLIBS  += $(filter-out -L%,$(RL_PKG_LIBS))
+else
+  # 2) Fallback simple
+  ifeq ($(UNAME_S),Darwin)
+    CFLAGS  += -I/opt/homebrew/opt/readline/include -I/usr/local/opt/readline/include
+    LDFLAGS += -L/opt/homebrew/opt/readline/lib     -L/usr/local/opt/readline/lib
+    LDLIBS  += -lreadline
+  else
+    LDLIBS  += -lreadline -lncurses
+  endif
+endif
+
+# ===== Sources (pas de wildcard) =====
 SRC_BUILTINS = \
 	src/builtins/builtins.c \
 	src/builtins/ft_cd.c \
@@ -87,12 +108,12 @@ SRC_UTILS = \
 	src/utils/utils.c
 
 SRCS = \
-	$(SRC_BUILTINS) $(SRC_ENV) $(SRC_EXEC) $(SRC_MAIN) $(SRC_SIGNALS) \
-	$(SRC_LEXER) $(SRC_PARSER) $(SRC_LCHECK) $(SRC_BRIDGE) $(SRC_UTILS)
+  $(SRC_BUILTINS) $(SRC_ENV) $(SRC_EXEC) $(SRC_MAIN) $(SRC_SIGNALS) \
+  $(SRC_LEXER) $(SRC_PARSER) $(SRC_LCHECK) $(SRC_BRIDGE) $(SRC_UTILS)
 
 OBJS := $(SRCS:%.c=obj/%.o)
 
-# ===== Progress bar config =====
+# ===== Progress bar (compatible mac & linux, sans `seq`) =====
 PROGRESS_FILE := .build_progress
 BAR_WIDTH     := 30
 TOTAL_OBJS    := $(words $(OBJS))
@@ -100,7 +121,6 @@ ifeq ($(TOTAL_OBJS),0)
   TOTAL_OBJS := 1
 endif
 
-# Étape de progression (affiche une barre 0..100% sur une seule ligne)
 define PROGRESS_STEP
 	@sh -c '\
 		printf . >> "$(PROGRESS_FILE)"; \
@@ -110,8 +130,12 @@ define PROGRESS_STEP
 		filled=$$((prc * bar_len / 100)); \
 		empty=$$((bar_len - filled)); \
 		printf "\r⏳  Progression: ["; \
-		printf "%0.s█" $$(seq 1 $$filled); \
-		printf "%0.s " $$(seq 1 $$empty); \
+		if [ $$filled -gt 0 ]; then \
+			printf "%*s" $$filled "" | tr " " "█"; \
+		fi; \
+		if [ $$empty -gt 0 ]; then \
+			printf "%*s" $$empty " "; \
+		fi; \
 		printf "] %3d%%  (%d/%d)" $$prc $$count $(TOTAL_OBJS); \
 	'
 endef
@@ -125,31 +149,22 @@ endef
 all:
 	@$(MAKE) -q $(NAME) >/dev/null 2>&1; \
 	case $$? in \
-	  0) \
-	    printf "\n🚫 Compilation déjà effectuée — rien à refaire. 🙅‍♂️\n\n"; \
-	    ;; \
-	  1) \
-	    rm -f "$(PROGRESS_FILE)"; \
-	    printf "\n🛠️  Compilation en cours... ⏳\n\n"; \
-	    if $(MAKE) -s --no-print-directory build; then \
-	      printf "\n\n✅ Compilation terminée ! 🎉😄\n\n"; \
-	    else \
-	      printf "\n\n❌ Échec de la compilation. 🔥\n"; \
-	      exit 2; \
-	    fi; \
-	    ;; \
-	  *) \
-	    printf "\n❌ Vérification de dépendances échouée.\n"; \
-	    exit 2; \
-	    ;; \
+	  0) printf "\n🚫 Déjà compilé — rien à faire. 🙅‍♂️\n\n";; \
+	  1) rm -f "$(PROGRESS_FILE)"; \
+	     printf "\n🛠️  Compilation en cours... ⏳\n\n"; \
+	     if $(MAKE) -s --no-print-directory build; then \
+	       printf "\n\n✅ Compilation terminée ! 🎉😄\n\n"; \
+	     else \
+	       printf "\n\n❌ Échec de la compilation. 🔥\n"; exit 2; \
+	     fi;; \
+	  *) printf "\n❌ Problème de dépendances.\n"; exit 2;; \
 	esac
-
-
 
 build: $(NAME)
 
 $(NAME): $(OBJS)
 	@$(CC) $(OBJS) $(LDFLAGS) $(LDLIBS) -o $@
+	@printf "\n🔗 Link: $@ OK\n"
 
 obj/%.o: %.c
 	@mkdir -p "$(dir $@)"
@@ -157,15 +172,13 @@ obj/%.o: %.c
 	$(PROGRESS_STEP)
 
 clean:
-	@printf "\n🧹  Nettoyage en cours... (ballet en action) 🧹\n"
+	@printf "\n🧹  Nettoyage en cours... 🧹\n"
 	@rm -rf obj
 	@rm -f "$(PROGRESS_FILE)"
 	@printf "✨ Nettoyage fini ! ✨\n\n"
 
-fclean:
-	@printf "\n🧹  Nettoyage complet en cours... 🧹\n"
-	@rm -rf obj
-	@rm -f "$(PROGRESS_FILE)"
+fclean: clean
+	@printf "🧹  Nettoyage binaire...\n"
 	@rm -f $(NAME)
 	@printf "✨ Nettoyage complet terminé ! 😌✨\n\n"
 
